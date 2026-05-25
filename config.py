@@ -1,0 +1,2 @@
+GRAVITY = 9.81
+TIME_STEP = 1.0

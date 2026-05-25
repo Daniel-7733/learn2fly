@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Logs and generated data
+*.log
+data/*.csv
+!data/.gitkeep
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build/cache
+build/
+dist/
+*.egg-info/
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# C/C++ build outputs
+*.o
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
