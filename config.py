@@ -1,2 +1,2 @@
-GRAVITY = 9.81
-TIME_STEP = 1.0
+GRAVITY: float = 9.81
+TIME_STEP: float = 1.0
