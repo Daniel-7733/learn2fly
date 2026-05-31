@@ -3,9 +3,9 @@ from config import GRAVITY, TIME_STEP
 
 
 def main():
-    plane: Plane = Plane(altitude=100.0, speed=20.0, angle=0.0)
-
     time_elapsed: int = 0
+
+    plane: Plane = Plane(altitude=100.0, horizontal_speed=20.0, angle=3.0)
 
     while plane.altitude > 0:
         plane.apply_gravity(GRAVITY, TIME_STEP)
@@ -13,9 +13,10 @@ def main():
 
         print(
             f"Time: {time_elapsed:.1f}s | "
-            f"Altitude: {plane.altitude:.2f} | "
-            f"Speed: {plane.speed:.2f} | "
-            f"Angle: {plane.angle:.2f}"
+            f"Altitude: {plane.altitude:.2f}m | "
+            f"horizontal Speed: {plane.horizontal_speed:.2f}m/s | "
+            f"Angle: {plane.angle:.2f}° | "
+            f"Vertical speed is: {plane.vertical_speed:.2f}m/s"
         )
 
     print("The plane has reached the ground.")
