@@ -8,8 +8,10 @@ class Plane:
         self.angle = angle
         self.vertical_speed: float = 0 
 
-    def apply_vertical_forces(self, gravity: float, lift: float, time_step: float) -> None:
+    def apply_vertical_forces(self, gravity: float, time_step: float) -> None:
+        lift: float = self.calculate_lift()
         net_acceleration: float = gravity + lift
+
         self.vertical_speed: float = self.calculate_next_vertical_speed(net_acceleration, time_step)
         self.altitude += self.vertical_speed * time_step 
 
@@ -23,4 +25,8 @@ class Plane:
     def calculate_next_vertical_speed(self, gravity: float, time_step: float) -> float:
         """final_velocity = initial_velocity + (acceleration x time)"""
         return self.vertical_speed + (gravity * time_step)
+
+    def calculate_lift(self) -> float:
+        lift_factor: float = 0.01
+        return self.angle * self.horizontal_speed * lift_factor
         

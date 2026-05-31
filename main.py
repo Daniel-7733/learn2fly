@@ -1,14 +1,14 @@
 from plane import Plane
-from config import GRAVITY, TIME_STEP, LIFT
+from config import GRAVITY, TIME_STEP
 
 
 def main():
     time_elapsed: int = 0
 
-    plane: Plane = Plane(altitude=100.0, horizontal_speed=20.0, angle=3.0)
+    plane: Plane = Plane(altitude=100.0, horizontal_speed=20.0, angle=10.0)
 
     while plane.altitude > 0:
-        plane.apply_vertical_forces(GRAVITY, LIFT, TIME_STEP)
+        plane.apply_vertical_forces(GRAVITY, TIME_STEP)
         time_elapsed += TIME_STEP
 
         print(
