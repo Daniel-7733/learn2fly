@@ -8,8 +8,9 @@ class Plane:
         self.angle = angle
         self.vertical_speed: float = 0 
 
-    def apply_gravity(self, gravity: float, time_step: float) -> None:
-        self.vertical_speed = self.calculate_next_vertical_speed(gravity, time_step)
+    def apply_vertical_forces(self, gravity: float, lift: float, time_step: float) -> None:
+        net_acceleration: float = gravity + lift
+        self.vertical_speed: float = self.calculate_next_vertical_speed(net_acceleration, time_step)
         self.altitude += self.vertical_speed * time_step 
 
         if self.altitude < 0:
