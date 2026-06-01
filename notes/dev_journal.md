@@ -26,14 +26,14 @@ Main goal:
 Plane has two kind of speed:
 1. vertical speed
 2. horizontal speed
-
-
+```
           ^
           |
           | vertical_speed
           |
 ----------+-------->
        horizontal_speed
+```
 
 Formula:
 - Vertical speed is tan(Theta) x horizontal speed
@@ -46,7 +46,7 @@ Plane has 4 forse:
 4. Drag
 
 The picture:
-
+```
         Lift
           ^
           |
@@ -54,6 +54,7 @@ Drag <--- P ---> Thrust
           |
           v
        Weight
+```
 
 There are two different speed in a plane: Vertical and horizontal (Groundspeed) speed. To calculate Vertical speed I use ```Vv = Vg.tan(θ) or Vertical speed = Groundspeed x tan(θ)```, then I use ```Vf = Vi + a.t``` to add the gravity. This formula make the fall more realistic. At the end, I update the altitude by this formula: ```altitude += Vertical speed x time```.
 

@@ -27,6 +27,18 @@ class Plane:
         return self.vertical_speed + (gravity * time_step)
 
     def calculate_lift(self) -> float:
+        """This is a very simple calculation about lifting. More complex one will be added next time."""
         lift_factor: float = 0.01
         return self.angle * self.horizontal_speed * lift_factor
         
+    def pitch_up(self, degree: float):
+        self.angle += degree
+
+        if self.angle > 45:
+            self.angle = 45
+
+    def pitch_down(self, degree: float):
+        self.angle -= degree
+
+        if self.angle < -45:
+            self.angle = -45
