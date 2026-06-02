@@ -12,18 +12,20 @@ class Plane:
         self.mass: float = mass 
 
     def update_physics(self, gravity: float, time_step: float) -> None:
-        lift: float = self.calculate_lift()
-        net_acceleration: float = gravity + lift
-
         self.calculate_horizontal_speed(time_step)
+
+        lift_force: float = self.calculate_lift()
+        lift_acceleration: float = lift_force / self.mass
+        net_acceleration: float = gravity + lift_acceleration
+
         self.vertical_speed: float = self.calculate_next_vertical_speed(net_acceleration, time_step)
         self.altitude += self.vertical_speed * time_step 
 
         if self.altitude < 0:
             self.altitude = 0 
 
-    def calculate_vertical_speed(self) -> float:
-        """vertical_speed = tan(Theta) x horizontal speed"""
+    def calculate_vertical_speed(self) -> float: # I won't use this one becsaue I use physic formula to solve the problem
+        """In geometr: vyertical_speed = tan(Theta) x horizontal speed"""
         return tan(radians(self.angle)) * self.horizontal_speed
     
     def calculate_next_vertical_speed(self, gravity: float, time_step: float) -> float:
