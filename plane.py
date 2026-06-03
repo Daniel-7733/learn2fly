@@ -6,16 +6,18 @@ class Plane:
         self.altitude = altitude
         self.horizontal_speed = horizontal_speed
         self.angle = angle
+        self.mass = mass 
         self.vertical_speed: float = 0 
-        self.thrust: float = 3 
-        self.drag: float = 1 
-        self.mass: float = mass 
+        self.thrust: float = 0 # for fall test I put 0 as value but then I'll change it to 3 or more 
+        self.drag: float = 0 
 
     def update_physics(self, gravity: float, time_step: float) -> None:
         self.calculate_horizontal_speed(time_step)
 
         lift_force: float = self.calculate_lift()
-        lift_acceleration: float = lift_force / self.mass
+        vertical_drag: float = self.calculate_vertical_drag()
+
+        lift_acceleration: float = (lift_force + vertical_drag) / self.mass
         net_acceleration: float = gravity + lift_acceleration
 
         self.vertical_speed: float = self.calculate_next_vertical_speed(net_acceleration, time_step)
@@ -44,13 +46,20 @@ class Plane:
 
         return effective_angle * self.horizontal_speed * lift_factor
         
+    def calculate_vertical_drag(self) -> float:
+        """calculating the resistance of drag on vertical axel"""
+        drag_factor: float = 0.05
+        return -self.vertical_speed * drag_factor
+
     def pitch_up(self, degree: float):
+        """User can change the angle of plane to the up"""
         self.angle += degree
 
         if self.angle > 45:
             self.angle = 45
 
     def pitch_down(self, degree: float):
+        """User can change the angle of plane to the down"""
         self.angle -= degree
 
         if self.angle < -45:
@@ -61,6 +70,13 @@ class Plane:
         f = ma -> a = f/m
         Vf = Vi + at
         """
+        self.drag = self.calculate_drag()
+
         net_force: float = self.thrust - self.drag
         acceleration: float = net_force / self.mass
         self.horizontal_speed += (acceleration * time_step)
+
+    def calculate_drag(self) -> float:
+        """Calculating the drag on x axel; The opposite forse of thrust"""
+        drag_factor: float = 0.05
+        return self.horizontal_speed * drag_factor

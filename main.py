@@ -3,9 +3,9 @@ from config import GRAVITY, TIME_STEP
 
 
 def main():
-    time_elapsed: int = 0
+    time_elapsed: float = 0
 
-    plane: Plane = Plane(altitude=100.0, horizontal_speed=20.0, angle=15.0, mass=2.0)
+    plane: Plane = Plane(altitude=1000000.0, horizontal_speed=0.0, angle=0.0, mass=2.0)
 
     while plane.altitude > 0:
         plane.update_physics(GRAVITY, TIME_STEP)

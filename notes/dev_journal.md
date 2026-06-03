@@ -79,4 +79,32 @@ for vertical speed we need to consider another think. Gravity is acceleration (m
   2. net accceleration = gravity + lift acceleration # Gravity is negetive number -> -9.81
   ```
 
+In addition, we do have vertical drag but a little tricky. If the the plane goes down then the drap force is postive and if it goes up the drop act oppsite and it will be negetive (like gravity). So, the air resistance will push the airplane down if it trys to fligh up and act completely oppsite if the plane fly down.
 
+Airplane goes up: (Drap force will be negetive like gravity)
+```
+    lift    drap
+      ^       | 
+      |   ^   |
+      |   |   v
+      ----P----
+          |
+          |
+          v
+        gravity
+```
+
+
+Airplane goes down: (Drap force will be positive like gravity)
+```
+    lift    drap
+      ^       ^ 
+      |       |
+      |       |
+      ----P----
+          |
+          v
+          |
+          v
+        gravity
+```
