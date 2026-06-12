@@ -2,14 +2,21 @@ from math import tan, radians
 
 
 class Plane:
-    def __init__(self, altitude: float, horizontal_speed: float, angle: float, mass: float) -> None:
+    def __init__(self, altitude: float, horizontal_speed: float, angle: float, mass: float,
+                 min_safe_speed: float = 50, critical_aoa: float = 15) -> None:
         self.altitude = altitude
         self.horizontal_speed = horizontal_speed
-        self.angle = angle
+        self.angle = angle # pitch / aircraft nose angle
         self.mass = mass 
         self.vertical_speed: float = 0 
-        self.thrust: float = 0 # for fall test I put 0 as value but then I'll change it to 3 or more 
-        self.drag: float = 0 
+        self.thrust: float = 0 # for fall test I put 0 as value but then I'll change it to 3 or more
+        self.drag: float = 0
+        self.aoa: float = 4 # -> formula -> (AoA = Pitch Angle − Flight Path Angle) && wing angle against airflow
+        
+        self.min_safe_speed = min_safe_speed 
+        self.critical_aoa = critical_aoa # stall boundary
+        self.max_thrust = 100
+
 
     def update_physics(self, gravity: float, time_step: float) -> None:
         self.calculate_horizontal_speed(time_step)
@@ -37,14 +44,13 @@ class Plane:
     def calculate_lift(self) -> float:
         """This is a very simple calculation about lifting. More complex one will be added next time."""
         lift_factor: float = 0.01
-        stall_angle: float = 15
 
-        if self.angle <= stall_angle:
-            effective_angle: float = self.angle
+        if self.aoa <= self.critical_aoa:
+            effective_aoa = self.aoa
         else: # if angle is more then stall angle the plane loss its effective angle and enter at stall angle
-            effective_angle = max(0, stall_angle - (self.angle - stall_angle))
+            effective_aoa = max(0, self.critical_aoa - (self.aoa - self.critical_aoa))
 
-        return effective_angle * self.horizontal_speed * lift_factor
+        return effective_aoa * self.horizontal_speed * lift_factor
         
     def calculate_vertical_drag(self) -> float:
         """calculating the resistance of drag on vertical axel"""
