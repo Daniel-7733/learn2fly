@@ -446,3 +446,195 @@ This is why aggressive turns quickly drain aircraft energy.
 
 A pilot who manages energy well can turn efficiently without sacrificing too much speed or altitude.
 
+---
+
+## Day 5
+
+# PD Controller (The Beginning of Smart Control)
+
+## What is a PD Controller?
+
+A PD (Proportional-Derivative) controller helps an autopilot make better decisions by considering not only where the aircraft is, but also where it is heading.
+
+Formula:
+
+command = Kp × error − Kd × rate
+
+### Definitions
+
+**Command**
+
+* The final output sent to the aircraft.
+* Examples:
+
+  * Pitch command
+  * Throttle command
+  * Rudder command
+
+**Error**
+
+* The difference between the target and the current state.
+
+Error = Target − Current
+
+Error tells me:
+
+> Where I am compared to where I want to be.
+
+---
+
+**Rate**
+
+* The rate of change of a variable.
+* Examples:
+
+  * Vertical speed
+  * Acceleration
+  * Change in altitude
+  * Change in speed
+
+Rate tells me:
+
+> Where I am heading.
+
+---
+
+## Controller Gains
+
+### Proportional Gain (Kp)
+
+The proportional term reacts to the size of the error.
+
+* Small error → small correction
+* Large error → large correction
+
+The farther I am from my goal, the stronger the controller reacts.
+
+---
+
+### Derivative Gain (Kd)
+
+The derivative term reacts to the rate of change.
+
+It helps the controller understand:
+
+> How quickly things are changing.
+
+This prevents:
+
+* Overshoot
+* Oscillation
+* Aggressive corrections
+
+The derivative term acts like a damping force that slows the controller as it approaches the target.
+
+---
+
+# Why Is Rate Important?
+
+Suppose the target speed is:
+
+50 m/s
+
+And we have two aircraft:
+
+Plane A:
+
+* Speed = 45 m/s
+* Acceleration = +10 m/s²
+
+Plane B:
+
+* Speed = 45 m/s
+* Acceleration = -10 m/s²
+
+At first glance, both aircraft look identical because:
+
+Error = 50 − 45 = 5 m/s
+
+However, their future is very different.
+
+Using:
+
+Vf = Vi + at
+
+After 1 second:
+
+Plane A:
+
+Vf = 45 + (10 × 1)
+
+Vf = 55 m/s
+
+Plane B:
+
+Vf = 45 + (-10 × 1)
+
+Vf = 35 m/s
+
+---
+
+Now we can see the difference.
+
+Plane A is already accelerating toward the target.
+
+Plane B is accelerating away from the target.
+
+Without considering the rate of change, both aircraft appear to have the same problem.
+
+By adding the derivative term, the autopilot gains a much clearer picture of what is happening.
+
+---
+
+# Evolution of My Autopilot
+
+At the beginning, my autopilot only looked at:
+
+1. Speed
+2. AoA
+3. Altitude
+
+Later I learned that this was not enough.
+
+The aircraft is an energy system, so I added:
+
+4. Energy State
+5. Energy Rate
+
+Then I learned that a controller also needs:
+
+6. Error
+
+   * Where am I compared to my goal?
+
+7. Rate
+
+   * Am I moving toward or away from my goal?
+
+And the next step is:
+
+8. Prediction
+
+   * Where will I be in the near future?
+
+---
+
+# What I Learned
+
+A simple autopilot reacts to problems.
+
+A smarter autopilot understands:
+
+* Current state
+* Trend
+* Future direction
+
+The goal is not only to understand where the aircraft is now, but also to understand what will happen next.
+
+Error tells me where I am.
+
+Rate tells me where I am heading.
+
+Prediction tells me where I will be.
+
+
