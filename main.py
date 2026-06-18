@@ -9,13 +9,16 @@
 
             classes and there duties
                 Plane:
-                    State of aircraft
-
-                AutoPilot:
-                    Decisions
+                    State of aircraft & stores state
 
                 FlightCalculator:
-                    Physics calculations. Ex -> distance = calculator.max_glide_distance(plane)
+                    Physics calculations & computes physics
+
+                AutoPilot:
+                    makes decisions
+
+                FlightAnalyzer
+                    interprets state
 
                 MissionPlanner:
                     Goals
@@ -24,6 +27,7 @@
 from plane import Plane
 from autopilot import AutoPilot
 from flight_calculator import FlightCalculator
+from flight_analyzer import FlightAnalyzer
 from config import GRAVITY, TIME_STEP
 
 
@@ -32,6 +36,8 @@ def main():
 
     plane: Plane = Plane(altitude=1200, horizontal_speed=85, pitch_angle=10, mass=20.0)
     autopilot: AutoPilot = AutoPilot()
+    flight_analyzer = FlightAnalyzer(plane, autopilot) 
+
 
     current_energy: float = FlightCalculator.total_energy(
         plane.mass, GRAVITY, plane.altitude,
@@ -87,9 +93,11 @@ def main():
             f"Energy Rate: {energy_rate:,.2f}J | "
             )
 
+        print(flight_analyzer.report())
+        
     print("The plane has reached the ground.")
 
-
+    
 
 if __name__ == "__main__":
     main()

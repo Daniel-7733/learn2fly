@@ -1,5 +1,6 @@
 class FlightCalculator:
     """
+    FlightCalculator = formulas
     shared calculations
 
     Measurement that I use in this program:
