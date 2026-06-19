@@ -20,6 +20,9 @@
                 FlightAnalyzer
                     interprets state
 
+                FlightReport:
+                    Presentation
+
                 MissionPlanner:
                     Goals
 """

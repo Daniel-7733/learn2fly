@@ -68,3 +68,30 @@ class FlightCalculator:
     def energy_rate(previous_energy: float, current_energy: float, time_step: float) -> float:
         """Energy rate is Energy rate = de/dt"""
         return (current_energy - previous_energy) / time_step
+
+    @staticmethod
+    def time_to_impact(altitude: float, vertical_speed: float) -> float:
+        """
+        This fucntion calculate that how much time (in second) does it take for altitude to become 0. 
+        Formula: time = altitude / vertical_speed
+        """
+        if vertical_speed >= 0:
+            return float("inf")
+        return altitude / abs(vertical_speed)
+    
+    @staticmethod
+    def time_to_unsafe_speed(first_veertical_speed: float, final_vertical_speed: float, acceleration: float) -> float:
+        """
+        This function calculate the amount of time (in second) that takes for object to reach to the unsafe speed. 
+        Formula: Vf = Vi + at -> t = (Vf - Vi) / a
+        """
+        return (final_vertical_speed - first_veertical_speed) / acceleration
+    
+    @staticmethod
+    def time_to_stall(aoa: float, aoa_rate: float, critical_aoa: float) -> float:
+        """This function calculate the amount of time (In second) that takes to reach to STALL. 
+        Formula: time = (critical_aoa - aoa) / aoa_rate"""
+        if aoa_rate >= 0:
+            return float("inf")
+        return (critical_aoa - aoa) / abs(aoa_rate)
+

@@ -1,3 +1,4 @@
+from enums import ThreatType
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,6 +74,16 @@ class FlightAnalyzer:
         risk = danger + urgency - recoverability
         """
         return self.calculate_danger() + self.calculate_urgency() - self.calculate_recoverability()
+
+    def urgency_variable(self, time_to_stall: float, time_to_impact: float) -> ThreatType:
+        """This function will say which variable is urgency and need to take care of it"""
+        if time_to_stall < time_to_impact:
+            return ThreatType.STALL
+
+        if time_to_impact < time_to_stall:
+            return ThreatType.IMPACT
+
+        return ThreatType.NONE
 
     def report(self) -> dict[str, int]:
         return {
