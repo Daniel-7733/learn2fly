@@ -75,7 +75,7 @@ class FlightCalculator:
         This fucntion calculate that how much time (in second) does it take for altitude to become 0. 
         Formula: time = altitude / vertical_speed
         """
-        if vertical_speed >= 0:
+        if vertical_speed <= 0:
             return float("inf")
         return altitude / abs(vertical_speed)
     
@@ -91,7 +91,11 @@ class FlightCalculator:
     def time_to_stall(aoa: float, aoa_rate: float, critical_aoa: float) -> float:
         """This function calculate the amount of time (In second) that takes to reach to STALL. 
         Formula: time = (critical_aoa - aoa) / aoa_rate"""
-        if aoa_rate >= 0:
+        if aoa >= critical_aoa:
+            return 0.0
+
+        if aoa_rate <= 0:
             return float("inf")
-        return (critical_aoa - aoa) / abs(aoa_rate)
+
+        return (critical_aoa - aoa) / aoa_rate
 
