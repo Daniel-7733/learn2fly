@@ -75,7 +75,7 @@ class FlightCalculator:
         This fucntion calculate that how much time (in second) does it take for altitude to become 0. 
         Formula: time = altitude / vertical_speed
         """
-        if vertical_speed <= 0:
+        if vertical_speed >= 0: # vertical_speed > 0 -> means climbing. vertical_speed == 0 -> means level flight. "Neither case will hit the ground." -> return float("inf")
             return float("inf")
         return altitude / abs(vertical_speed)
     
