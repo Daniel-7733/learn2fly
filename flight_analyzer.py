@@ -95,14 +95,7 @@ class FlightAnalyzer:
         if speed_margin <= 0 or aoa_margin <= 0:
             return RiskLevel.CRITICAL
 
-        # 2. Very close to boundary, even if rate is slow
-        if aoa_margin < 2 or speed_margin < 5:
-            return RiskLevel.HIGH
-
-        if aoa_margin < 5 or speed_margin < 10:
-            return RiskLevel.MODERATE
-
-        # 3. Future countdown danger
+        # 2. Future countdown danger
         shortest_time_to_danger: float = min(time_to_stall, time_to_impact)
 
         if shortest_time_to_danger < 2:
@@ -111,7 +104,14 @@ class FlightAnalyzer:
         if shortest_time_to_danger < 5:
             return RiskLevel.HIGH
 
+        # 3. Very close to boundary, even if rate is slow
+        if aoa_margin < 2 or speed_margin < 5:
+            return RiskLevel.HIGH
+
         if shortest_time_to_danger < 15:
+            return RiskLevel.MODERATE
+
+        if aoa_margin < 5 or speed_margin < 10:
             return RiskLevel.MODERATE
 
         return RiskLevel.LOW
