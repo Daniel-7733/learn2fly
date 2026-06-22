@@ -99,3 +99,12 @@ class FlightCalculator:
 
         return (critical_aoa - aoa) / aoa_rate
 
+    @staticmethod
+    def rate_of_change(previous_value: float, current_value: float, time_step: float) -> float:
+        """aoa_rate = (current_aoa - previous_aoa) / time_step"""
+        if time_step <= 0:
+            raise ValueError("time_step must be greater than 0")
+
+        return (current_value - previous_value) / time_step
+
+

@@ -18,6 +18,8 @@ class Plane:
         # ===== angle & degree veriables ===== #
         self.pitch_angle = pitch_angle # pitch / aircraft nose angle
         self.aoa: float = 0 # -> formula -> (AoA = Pitch Angle − Flight Path Angle) && wing angle against airflow
+        self.previous_aoa: float = 0.0
+        self.aoa_rate: float = 0.0
         self.critical_aoa = critical_aoa # stall boundary
 
         # ===== Force veriables ==== #

@@ -48,8 +48,13 @@ def main():
     )
 
     while plane.altitude > 0:
+        plane.previous_aoa = plane.aoa
         plane.aoa = plane.calculate_aoa()
-        autopilot.update(plane)
+        plane.aoa_rate = FlightCalculator.rate_of_change(
+            plane.previous_aoa,
+            plane.aoa,
+            TIME_STEP,
+        )
 
         previous_energy: float = current_energy
 

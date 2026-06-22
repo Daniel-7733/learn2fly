@@ -1,4 +1,7 @@
-from enums import ThreatType
+from enums import ThreatType, RiskLevel
+from flight_calculator import FlightCalculator
+from flight_report import FlightReport
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -85,10 +88,64 @@ class FlightAnalyzer:
 
         return ThreatType.NONE
 
-    def report(self) -> dict[str, int]:
-        return {
-            "danger": self.calculate_danger(),
-            "urgency": self.calculate_urgency(),
-            "recoverability": self.calculate_recoverability(),
-            "risk": self.calculate_risk(),
-        }
+    def calculate_risk_level(self, speed_margin: float, aoa_margin: float, time_to_stall: float, time_to_impact: float) -> RiskLevel:
+        """So, this function answer to this question: How serious is the whole situation?"""
+
+        # 1. Already crossed boundary
+        if speed_margin <= 0 or aoa_margin <= 0:
+            return RiskLevel.CRITICAL
+
+        # 2. Very close to boundary, even if rate is slow
+        if aoa_margin < 2 or speed_margin < 5:
+            return RiskLevel.HIGH
+
+        if aoa_margin < 5 or speed_margin < 10:
+            return RiskLevel.MODERATE
+
+        # 3. Future countdown danger
+        shortest_time_to_danger: float = min(time_to_stall, time_to_impact)
+
+        if shortest_time_to_danger < 2:
+            return RiskLevel.CRITICAL
+
+        if shortest_time_to_danger < 5:
+            return RiskLevel.HIGH
+
+        if shortest_time_to_danger < 15:
+            return RiskLevel.MODERATE
+
+        return RiskLevel.LOW
+
+    def report(self) -> FlightReport:
+        speed_margin = self.plane.horizontal_speed - self.plane.min_safe_speed
+        aoa_margin = self.plane.critical_aoa - self.plane.aoa
+
+        time_to_stall = FlightCalculator.time_to_stall(
+            self.plane.aoa,
+            self.plane.aoa_rate,
+            self.plane.critical_aoa,
+        )
+
+        time_to_impact = FlightCalculator.time_to_impact(
+            self.plane.altitude,
+            self.plane.vertical_speed,
+        )
+
+        most_urgent_threat = self.urgency_variable(time_to_stall, time_to_impact)
+
+        risk = self.calculate_risk_level(
+            speed_margin,
+            aoa_margin,
+            time_to_stall,
+            time_to_impact,
+        )
+
+        return FlightReport(
+            speed_margin,
+            aoa_margin,
+            self.plane.altitude,
+            time_to_stall,
+            time_to_impact,
+            most_urgent_threat,
+            risk,
+        )

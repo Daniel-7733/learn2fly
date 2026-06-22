@@ -1,8 +1,10 @@
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from enums import ThreatType, RiskLevel
 
+ # ====================== Update Class ====================== #
 class FlightReport:
     def __init__(self, speed_margin: float, aoa_margin: float, altitude: float, time_to_stall: float, time_to_impact: float, 
                  most_urgent_threat: "ThreatType", risk: "RiskLevel") -> None:
@@ -15,14 +17,29 @@ class FlightReport:
         self.most_urgent_threat = most_urgent_threat
         self.risk = risk
 
-    def to_dict(self) -> dict[str, str]:
-        return {
-            "Speed Margin": f"{self.speed_margin} m/s",
-            "AoA Margin": f"{self.aoa_margin}°",
-            "Altitude": f"{self.altitude} m",
-            "Time To Stall": f"{self.time_to_stall} s",
-            "Time To Impact": f"{self.time_to_impact} s",
-            "Most Urgent Threat": self.most_urgent_threat.value,
-            "Risk": self.risk.value,
-        }
+    def __str__(self) -> str:
+        """Returns a human-readable telemetry dashboard for printing."""
+        return (
+            f"\n=== FLIGHT SAFETY REPORT ===\n"
+            f"Risk Level:         {self.risk.value}\n"
+            f"Most Urgent Threat: {self.most_urgent_threat.value}\n"
+            f"----------------------------\n"
+            f"Altitude:           {self.altitude:,.2f} m\n"
+            f"Speed Margin:       {self.speed_margin:,.2f} m/s\n"
+            f"AoA Margin:         {self.aoa_margin:,.2f}°\n"
+            f"Time to Stall:      {self.time_to_stall:,.2f}s\n"
+            f"Time to Impact:     {self.time_to_impact:,.2f}s\n"
+            f"============================"
+        )
+
+    def __repr__(self) -> str:
+        """Returns a standard developer-focused string representation."""
+        return (
+            f"FlightReport(speed_margin={self.speed_margin}, aoa_margin={self.aoa_margin}, "
+            f"altitude={self.altitude}, time_to_stall={self.time_to_stall}, "
+            f"time_to_impact={self.time_to_impact}, most_urgent_threat={self.most_urgent_threat}, "
+            f"risk={self.risk})"
+        )
+ # ====================== Update Class ====================== #
+
 
