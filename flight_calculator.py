@@ -107,4 +107,12 @@ class FlightCalculator:
 
         return (current_value - previous_value) / time_step
 
+    @staticmethod
+    def recovery_margin(available_time: float, required_time: float) -> float:
+        """
+        recovery_margin = time_to_impact - required_recovery_time
+        available_time = time_to_impact, required_recovery_time = base_time
+        """
+        return available_time - required_time
+
 

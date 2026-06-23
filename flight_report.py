@@ -1,13 +1,13 @@
-
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from enums import ThreatType, RiskLevel
 
- # ====================== Update Class ====================== #
+if TYPE_CHECKING:
+    from enums import ThreatType, RiskLevel, Recoverability
+
+
 class FlightReport:
     def __init__(self, speed_margin: float, aoa_margin: float, altitude: float, time_to_stall: float, time_to_impact: float, 
-                 most_urgent_threat: "ThreatType", risk: "RiskLevel") -> None:
+                 most_urgent_threat: "ThreatType", risk: "RiskLevel", recoverability: "Recoverability") -> None:
 
         self.speed_margin = speed_margin
         self.aoa_margin = aoa_margin
@@ -16,6 +16,7 @@ class FlightReport:
         self.time_to_impact = time_to_impact
         self.most_urgent_threat = most_urgent_threat
         self.risk = risk
+        self.recoverability = recoverability
 
     def __str__(self) -> str:
         """Returns a human-readable telemetry dashboard for printing."""
@@ -23,6 +24,7 @@ class FlightReport:
             f"\n=== FLIGHT SAFETY REPORT ===\n"
             f"Risk Level:         {self.risk.value}\n"
             f"Most Urgent Threat: {self.most_urgent_threat.value}\n"
+            f"recoverability:     {self.recoverability.value}\n"
             f"----------------------------\n"
             f"Altitude:           {self.altitude:,.2f} m\n"
             f"Speed Margin:       {self.speed_margin:,.2f} m/s\n"
@@ -40,6 +42,4 @@ class FlightReport:
             f"time_to_impact={self.time_to_impact}, most_urgent_threat={self.most_urgent_threat}, "
             f"risk={self.risk})"
         )
- # ====================== Update Class ====================== #
-
 

@@ -39,7 +39,7 @@ def main():
 
     plane: Plane = Plane(altitude=1200, horizontal_speed=85, pitch_angle=10, mass=20.0)
     autopilot: AutoPilot = AutoPilot()
-    flight_analyzer = FlightAnalyzer(plane, autopilot) 
+    flight_analyzer: FlightAnalyzer = FlightAnalyzer(plane, autopilot) 
 
 
     current_energy: float = FlightCalculator.total_energy(
@@ -50,11 +50,7 @@ def main():
     while plane.altitude > 0:
         plane.previous_aoa = plane.aoa
         plane.aoa = plane.calculate_aoa()
-        plane.aoa_rate = FlightCalculator.rate_of_change(
-            plane.previous_aoa,
-            plane.aoa,
-            TIME_STEP,
-        )
+        plane.aoa_rate = FlightCalculator.rate_of_change(plane.previous_aoa, plane.aoa, TIME_STEP)
 
         previous_energy: float = current_energy
 

@@ -1,4 +1,4 @@
-from enums import ThreatType, RiskLevel
+from enums import ThreatType, RiskLevel, Recoverability
 from flight_calculator import FlightCalculator
 from flight_report import FlightReport
 
@@ -13,9 +13,9 @@ class FlightAnalyzer:
     """
     FlightAnalyzer = interpretation
 
-    1. Is the plane in danger?
-    2. How urgent is the danger?
-    3. How many recovery options remain?
+    1. Danger: Is the plane in danger?
+    2. Urgency: How urgent is the danger?
+    3. Recoverability: How many recovery options remain?
     """
     def __init__(self, plane: "Plane", autopilot: "AutoPilot") -> None:
         self.plane = plane
@@ -37,7 +37,7 @@ class FlightAnalyzer:
 
         return danger
 
-    def calculate_recoverability(self) -> int:
+    def calculate_recoverability_score(self) -> int: # I might not use this one
         recoverability: int = 0
 
         if self.plane.altitude > 1000:
@@ -76,7 +76,7 @@ class FlightAnalyzer:
         A simple model for calculating the risk:
         risk = danger + urgency - recoverability
         """
-        return self.calculate_danger() + self.calculate_urgency() - self.calculate_recoverability()
+        return self.calculate_danger() + self.calculate_urgency() - self.calculate_recoverability_score()
 
     def urgency_variable(self, time_to_stall: float, time_to_impact: float) -> ThreatType:
         """This function will say which variable is urgency and need to take care of it"""
@@ -116,6 +116,35 @@ class FlightAnalyzer:
 
         return RiskLevel.LOW
 
+    def classify_recoverability(self, recovery_margin: float) -> Recoverability:
+        if recovery_margin < 0:
+            return Recoverability.IMPOSSIBLE
+
+        if recovery_margin < 5:
+            return Recoverability.POOR
+
+        if recovery_margin < 15:
+            return Recoverability.GOOD
+
+        return Recoverability.EXCELLENT
+
+    def estimate_required_recovery_time(self, aoa_margin: float, speed_margin: float, vertical_speed: float, throttle: float) -> float:
+        required_time: float = 5.0
+
+        if abs(vertical_speed) > 20:
+            required_time += 3.0
+
+        if aoa_margin < 3:
+            required_time += 3.0
+
+        if speed_margin < 10:
+            required_time += 2.0
+
+        if throttle < 0.5:
+            required_time += 2.0
+
+        return required_time
+
     def report(self) -> FlightReport:
         speed_margin = self.plane.horizontal_speed - self.plane.min_safe_speed
         aoa_margin = self.plane.critical_aoa - self.plane.aoa
@@ -140,6 +169,20 @@ class FlightAnalyzer:
             time_to_impact,
         )
 
+        required_time = self.estimate_required_recovery_time(
+                aoa_margin,
+                speed_margin,
+                self.plane.vertical_speed,
+                self.plane.throttle,
+                )
+
+        recovery_margin = FlightCalculator.recovery_margin(
+                FlightCalculator.time_to_impact(self.plane.altitude, self.plane.vertical_speed),
+                required_time,
+                )
+
+        recoverability = self.classify_recoverability(recovery_margin)
+
         return FlightReport(
             speed_margin,
             aoa_margin,
@@ -148,4 +191,5 @@ class FlightAnalyzer:
             time_to_impact,
             most_urgent_threat,
             risk,
+            recoverability,
         )

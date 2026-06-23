@@ -15,3 +15,10 @@ class ThreatType(Enum):
     OVERSPEED = "OVERSPEED"
 
 
+class Recoverability(Enum):
+    IMPOSSIBLE = "IMPOSSIBLE"
+    POOR = "POOR"
+    GOOD = "GOOD"
+    EXCELLENT = "EXCELLENT"
+
+
