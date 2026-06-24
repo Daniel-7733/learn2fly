@@ -22,3 +22,10 @@ class Recoverability(Enum):
     EXCELLENT = "EXCELLENT"
 
 
+class EnergyState(Enum):
+    LOW = "LOW"
+    MODERATE = "MODERATE"
+    HIGH = "HIGH"
+    EXCESSIVE = "EXCESSIVE"
+
+

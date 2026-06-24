@@ -1,4 +1,4 @@
-from enums import ThreatType, RiskLevel, Recoverability
+from enums import ThreatType, RiskLevel, Recoverability, EnergyState
 from flight_calculator import FlightCalculator
 from flight_report import FlightReport
 
@@ -20,6 +20,9 @@ class FlightAnalyzer:
     def __init__(self, plane: "Plane", autopilot: "AutoPilot") -> None:
         self.plane = plane
         self.autopilot = autopilot
+
+
+    # ============ Analyzing the score ============== #
 
     def calculate_danger(self) -> int:
         danger: int = 0
@@ -71,12 +74,30 @@ class FlightAnalyzer:
 
         return urgency
 
+    def calculate_specific_energy_score(self, specific_energy: float) -> int:
+        if specific_energy < 100:
+            return 0
+
+        if specific_energy < 500:
+            return 1
+
+        if specific_energy < 1000:
+            return 2
+
+        if specific_energy < 10000:
+            return 3
+
+        return 4
+
     def calculate_risk(self) -> int:
         """
         A simple model for calculating the risk:
         risk = danger + urgency - recoverability
         """
         return self.calculate_danger() + self.calculate_urgency() - self.calculate_recoverability_score()
+
+
+    # ============ Analyzing the Level ============== #
 
     def urgency_variable(self, time_to_stall: float, time_to_impact: float) -> ThreatType:
         """This function will say which variable is urgency and need to take care of it"""
@@ -127,6 +148,21 @@ class FlightAnalyzer:
             return Recoverability.GOOD
 
         return Recoverability.EXCELLENT
+
+    def calculate_specific_energy_level(self, specific_energy: float) -> EnergyState:
+        if specific_energy < 500:
+            return EnergyState.LOW
+
+        if specific_energy < 2000:
+            return EnergyState.MODERATE
+
+        if specific_energy < 15000:
+            return EnergyState.HIGH
+
+        return EnergyState.EXCESSIVE
+
+
+    # ============ Analyzing the lefted time  ============== #
 
     def estimate_required_recovery_time(self, aoa_margin: float, speed_margin: float, vertical_speed: float, throttle: float) -> float:
         required_time: float = 5.0
