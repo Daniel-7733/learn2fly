@@ -58,7 +58,7 @@ def main():
 
         total_speed: float = FlightCalculator.total_speed(plane.horizontal_speed, plane.vertical_speed)
         current_energy: float = FlightCalculator.total_energy(plane.mass, GRAVITY, plane.altitude, total_speed)
-        energy_rate: float = FlightCalculator.energy_rate(previous_energy, current_energy, TIME_STEP)
+        energy_rate: float = FlightCalculator.rate_of_change(previous_energy, current_energy, TIME_STEP)
 
         time_elapsed += TIME_STEP
 

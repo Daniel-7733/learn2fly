@@ -65,13 +65,8 @@ class FlightCalculator:
         return (horizontal_speed**2 + vertical_speed**2) ** 0.5
 
     @staticmethod
-    def energy_rate(previous_energy: float, current_energy: float, time_step: float) -> float:
-        """Energy rate is Energy rate = de/dt"""
-        return (current_energy - previous_energy) / time_step
-
-    @staticmethod
     def rate_of_change(previous_value: float, current_value: float, time_step: float) -> float:
-        """aoa_rate = (current_aoa - previous_aoa) / time_step"""
+        """rate of change = dy/dx"""
         if time_step <= 0:
             raise ValueError("time_step must be greater than 0")
         return (current_value - previous_value) / time_step
