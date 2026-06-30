@@ -49,14 +49,18 @@ def main():
 
     while plane.altitude > 0:
         plane.previous_aoa = plane.aoa
-        plane.aoa = plane.calculate_aoa()
-        plane.aoa_rate = FlightCalculator.rate_of_change(plane.previous_aoa, plane.aoa, TIME_STEP)
 
         previous_energy: float = current_energy
+        previous_specific_energy: float = plane.specific_energy
 
         plane.update_physics(GRAVITY, TIME_STEP)
 
+        plane.aoa_rate = FlightCalculator.rate_of_change(plane.previous_aoa, plane.aoa, TIME_STEP)
         total_speed: float = FlightCalculator.total_speed(plane.horizontal_speed, plane.vertical_speed)
+
+        plane.specific_energy = FlightCalculator.specific_energy(GRAVITY, plane.altitude, total_speed)
+        plane.energy_rate = FlightCalculator.rate_of_change(previous_specific_energy, plane.specific_energy, TIME_STEP)
+
         current_energy: float = FlightCalculator.total_energy(plane.mass, GRAVITY, plane.altitude, total_speed)
         energy_rate: float = FlightCalculator.rate_of_change(previous_energy, current_energy, TIME_STEP)
 

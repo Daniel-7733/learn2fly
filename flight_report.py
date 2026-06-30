@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from enums import ThreatType, RiskLevel, Recoverability
+    from enums import ThreatType, RiskLevel, Recoverability, EnergyState
 
 
 class FlightReport:
     def __init__(self, speed_margin: float, aoa_margin: float, altitude: float, time_to_stall: float, time_to_impact: float, 
-                 most_urgent_threat: "ThreatType", risk: "RiskLevel", recoverability: "Recoverability") -> None:
+                 most_urgent_threat: "ThreatType", risk: "RiskLevel", recoverability: "Recoverability", energy_state: "EnergyState") -> None:
 
         self.speed_margin = speed_margin
         self.aoa_margin = aoa_margin
@@ -17,6 +17,7 @@ class FlightReport:
         self.most_urgent_threat = most_urgent_threat
         self.risk = risk
         self.recoverability = recoverability
+        self.energy_state = energy_state
 
     def __str__(self) -> str:
         """Returns a human-readable telemetry dashboard for printing."""
@@ -25,6 +26,8 @@ class FlightReport:
             f"Risk Level:         {self.risk.value}\n"
             f"Most Urgent Threat: {self.most_urgent_threat.value}\n"
             f"recoverability:     {self.recoverability.value}\n"
+            f"Energy State:       {self.energy_state.value}\n"
+            f"Predictive Analysis:          \n"
             f"----------------------------\n"
             f"Altitude:           {self.altitude:,.2f} m\n"
             f"Speed Margin:       {self.speed_margin:,.2f} m/s\n"

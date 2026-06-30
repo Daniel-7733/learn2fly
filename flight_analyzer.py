@@ -112,26 +112,23 @@ class FlightAnalyzer:
     def calculate_risk_level(self, speed_margin: float, aoa_margin: float, time_to_stall: float, time_to_impact: float) -> RiskLevel:
         """So, this function answer to this question: How serious is the whole situation?"""
 
-        # 1. Already crossed boundary
+        # 1. Immediate Crash / Crossed Boundary
         if speed_margin <= 0 or aoa_margin <= 0:
             return RiskLevel.CRITICAL
 
-        # 2. Future countdown danger
         shortest_time_to_danger: float = min(time_to_stall, time_to_impact)
 
+        # 2. All Time-Based Countdown Dangers (Highest priority to lowest)
         if shortest_time_to_danger < 2:
             return RiskLevel.CRITICAL
-
         if shortest_time_to_danger < 5:
             return RiskLevel.HIGH
-
-        # 3. Very close to boundary, even if rate is slow
-        if aoa_margin < 2 or speed_margin < 5:
-            return RiskLevel.HIGH
-
         if shortest_time_to_danger < 15:
             return RiskLevel.MODERATE
 
+        # 3. Static Margin Dangers (Checked only if time is safe)
+        if aoa_margin < 2 or speed_margin < 5:
+            return RiskLevel.HIGH
         if aoa_margin < 5 or speed_margin < 10:
             return RiskLevel.MODERATE
 
@@ -219,6 +216,10 @@ class FlightAnalyzer:
 
         recoverability = self.classify_recoverability(recovery_margin)
 
+
+        specific_energy_score = self.calculate_specific_energy_score(self.plane.specific_energy)
+        energy_state = self.calculate_specific_energy_level(self.plane.specific_energy)
+
         return FlightReport(
             speed_margin,
             aoa_margin,
@@ -228,4 +229,5 @@ class FlightAnalyzer:
             most_urgent_threat,
             risk,
             recoverability,
+            energy_state,
         )

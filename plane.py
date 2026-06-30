@@ -28,6 +28,10 @@ class Plane:
         self.max_thrust: float = 100
         self.thrust: float = 0
 
+        # ===== Energy veriables ==== #
+        self.specific_energy = 0.0
+        self.energy_rate = 0.0
+
     def update_physics(self, gravity: float, time_step: float) -> None:
         self.calculate_horizontal_speed(time_step)
         self.aoa = self.calculate_aoa()
