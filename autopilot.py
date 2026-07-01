@@ -1,3 +1,6 @@
+from flight_calculator import FlightCalculator
+from flight_controller import FlightController
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,29 +27,37 @@ class AutoPilot:
         self.max_pitch_command = max_pitch_command
         self.max_safe_aoa: float = 12
 
-    def update(self, plane: "Plane") -> None:
+    def update(self, plane: "Plane", controller: "FlightController") -> None:
         """Evaluates plane sensors and updates flight controls each frame."""
 
         # Priority 1: protect speed
         if plane.horizontal_speed < plane.min_safe_speed - self.speed_deadband:
-            plane.thrust = plane.max_thrust
-            plane.pitch_down(1.0)
+            controller.target_pitch = -5.0
+            controller.target_throttle = 1.0
+            #plane.thrust = plane.max_thrust
+            #plane.pitch_down(1.0)
             return
         
         # Priority 2: protect AoA & Stall protection
         if plane.aoa > self.max_safe_aoa:
-            plane.set_throttle(1.0)
-            plane.pitch_down(5.0)
+            controller.target_pitch = -5.0
+            controller.target_throttle = 1.0
+            # TODO: Much later:
+            # controller.update_pitch(plane, dt)
+            # controller.update_throttle(plane, dt)
+
+            #plane.set_throttle(1.0)
+            #plane.pitch_down(5.0)
             return
 
         # Priority 3: Altitude control
-        altitude_error = self.target_altitude - plane.altitude
+        altitude_error = FlightCalculator.calculate_error(self.target_altitude, plane.altitude)
 
         if abs(altitude_error) <= self.altitude_deadband:   # Do nothing if the plane is within the acceptable altitude range
             return
 
         pitch_command = altitude_error * self.altitude_gain # Calculate proportional pitch change based on altitude error
-        pitch_command = self._clamp(                        # Limit the calculated pitch command to safe operational boundaries
+        pitch_command = FlightCalculator.clamp(                        # Limit the calculated pitch command to safe operational boundaries
             pitch_command,
             -self.max_pitch_command,
             self.max_pitch_command,
@@ -59,7 +70,4 @@ class AutoPilot:
             plane.set_throttle(0.3)
             plane.pitch_down(abs(pitch_command))
 
-    def _clamp(self, value: float, minimum: float, maximum: float) -> float:
-        """Restricts a numerical value between a minimum and maximum limit."""
-        return max(minimum, min(maximum, value))
 

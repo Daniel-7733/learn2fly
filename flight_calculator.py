@@ -109,4 +109,19 @@ class FlightCalculator:
         """
         return available_time - required_time
 
+    @staticmethod
+    def calculate_error(target: float, current: float) -> float:
+        """Error = target_value - current_value"""
+        return target - current
+
+    @staticmethod
+    def proportional_command(gain: float, error: float) -> float:
+        """Command = gain x error"""
+        return gain * error
+    
+    @staticmethod
+    def clamp(value: float, minimum: float, maximum: float) -> float:
+        """Restricts a numerical value between a minimum and maximum limit."""
+        return max(minimum, min(maximum, value))
+
 

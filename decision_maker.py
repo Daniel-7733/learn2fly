@@ -1,24 +1,25 @@
 class DecisionMaker:
-    def __init__(self, pitch_angle: float) -> None:
-        """
-        The brain of the autonomous pilot.
+    """
+    The brain of the autonomous pilot.
 
-        Reads the FlightReport.
+    Reads the FlightReport.
 
-        Chooses the best strategy.
+    Chooses the best strategy.
 
-        Sends targets to the controllers.
+    Sends targets to the controllers.
 
-        DecisionMaker
-                │
-                ├── Reads FlightReport
-                ├── Chooses Strategy
-                └── Returns Commands
+    DecisionMaker
+            │
+            ├── Reads FlightReport
+            ├── Chooses Strategy
+            └── Returns Commands
 
-        Ex: 
-        decision = decision_maker.make_decision(report)
-        autopilot.execute(decision)
-        """
+    Ex: 
+    decision = decision_maker.make_decision(report)
+    autopilot.execute(decision)
+    """
 
+    def __init__(self) -> None:
+        pass
 
 
