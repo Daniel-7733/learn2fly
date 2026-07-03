@@ -27,6 +27,16 @@ class FlightController:
         plane.pitch_angle += pitch_change
 
     def update_throttle(self, plane: "Plane", dt: float) -> None:
+        """
+        Updating the throttle. 
+        Plane is the Object and dt is delta time
+        """
+        throttle_error: float = FlightCalculator.calculate_error(self.target_throttle, plane.throttle)
+        max_change: float = self.max_throttle_rate * dt
+        throttle_change: float = FlightCalculator.clamp(throttle_error, -max_change, max_change)
+        plane.throttle += throttle_change
+
+    def update_bank(self, plane: "Plane", dt: float):
         pass
 
 
