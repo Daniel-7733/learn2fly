@@ -1,4 +1,4 @@
-from flight_calculator import FlightCalculator
+from .flight_calculator import FlightCalculator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

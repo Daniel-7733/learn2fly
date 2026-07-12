@@ -1,5 +1,5 @@
-from flight_calculator import FlightCalculator
-from flight_controller import FlightController
+from .flight_calculator import FlightCalculator
+from .flight_controller import FlightController
 
 from typing import TYPE_CHECKING
 

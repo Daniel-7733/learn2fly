@@ -1,6 +1,6 @@
-from enums import ThreatType, RiskLevel, Recoverability, EnergyState
-from flight_calculator import FlightCalculator
-from flight_report import FlightReport
+from .enums import ThreatType, RiskLevel, Recoverability, EnergyState
+from .flight_calculator import FlightCalculator
+from .flight_report import FlightReport
 
 from typing import TYPE_CHECKING
 

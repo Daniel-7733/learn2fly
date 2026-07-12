@@ -27,10 +27,10 @@
                     Goals
 """
 
-from plane import Plane
-from autopilot import AutoPilot
-from flight_calculator import FlightCalculator
-from flight_analyzer import FlightAnalyzer
+from flight_systems.plane import Plane
+from flight_systems.autopilot import AutoPilot
+from flight_systems.flight_calculator import FlightCalculator
+from flight_systems.flight_analyzer import FlightAnalyzer
 from config import GRAVITY, TIME_STEP
 
 
