@@ -26,86 +26,69 @@
                 MissionPlanner:
                     Goals
 """
+from config import TIME_STEP
 
 from flight_systems.plane import Plane
 from flight_systems.autopilot import AutoPilot
-from flight_systems.flight_calculator import FlightCalculator
 from flight_systems.flight_analyzer import FlightAnalyzer
-from config import GRAVITY, TIME_STEP
+from flight_systems.flight_controller import FlightController
+from flight_systems.flight_system import FlightSystem
+
+from simulations.simulation import Simulation
 
 
-def main():
-    time_elapsed: float = 0
+def main() -> None:
+    # ---------------------------------------------------------
+    # 1. Create the aircraft
+    # ---------------------------------------------------------
 
-    plane: Plane = Plane(altitude=1200, horizontal_speed=85, pitch_angle=10, mass=20.0)
-    autopilot: AutoPilot = AutoPilot()
-    flight_analyzer: FlightAnalyzer = FlightAnalyzer(plane, autopilot) 
-
-
-    current_energy: float = FlightCalculator.total_energy(
-        plane.mass, GRAVITY, plane.altitude,
-        FlightCalculator.total_speed(plane.horizontal_speed, plane.vertical_speed)
+    plane = Plane(
+        altitude=1200.0,
+        horizontal_speed=85.0,
+        pitch_angle=10.0,
+        mass=20.0,
     )
 
-    while plane.altitude > 0:
-        plane.previous_aoa = plane.aoa
+    # ---------------------------------------------------------
+    # 2. Create the aircraft specialists
+    # ---------------------------------------------------------
 
-        previous_energy: float = current_energy
-        previous_specific_energy: float = plane.specific_energy
+    autopilot = AutoPilot()
 
-        plane.update_physics(GRAVITY, TIME_STEP)
+    flight_controller = FlightController(
+        target_pitch=plane.pitch_angle,
+        target_throttle=plane.throttle,
+        max_pitch_rate=5.0,
+        max_throttle_rate=0.2,
+    )
 
-        plane.aoa_rate = FlightCalculator.rate_of_change(plane.previous_aoa, plane.aoa, TIME_STEP)
-        total_speed: float = FlightCalculator.total_speed(plane.horizontal_speed, plane.vertical_speed)
+    flight_analyzer = FlightAnalyzer(
+        plane,
+        autopilot,
+    )
 
-        plane.specific_energy = FlightCalculator.specific_energy(GRAVITY, plane.altitude, total_speed)
-        plane.energy_rate = FlightCalculator.rate_of_change(previous_specific_energy, plane.specific_energy, TIME_STEP)
+    # ---------------------------------------------------------
+    # 3. Connect them through FlightSystem
+    # ---------------------------------------------------------
 
-        current_energy: float = FlightCalculator.total_energy(plane.mass, GRAVITY, plane.altitude, total_speed)
-        energy_rate: float = FlightCalculator.rate_of_change(previous_energy, current_energy, TIME_STEP)
+    flight_system = FlightSystem(
+        plane=plane,
+        autopilot=autopilot,
+        flight_analyzer=flight_analyzer,
+        flight_controller=flight_controller,
+    )
 
-        time_elapsed += TIME_STEP
+    # ---------------------------------------------------------
+    # 4. Create and start the simulated world
+    # ---------------------------------------------------------
 
-        
-        #if time_elapsed == 2:
-            #plane.pitch_up(30)
-        
-        ke: float = FlightCalculator.kinetic_energy(plane.mass, total_speed)
-        pe: float = FlightCalculator.potential_energy(plane.mass, GRAVITY, plane.altitude)
-        energy: float = FlightCalculator.total_energy(plane.mass, GRAVITY, plane.altitude, total_speed)
-        specific_energy: float = FlightCalculator.specific_energy(GRAVITY, plane.altitude, total_speed)
-        estimated_distance: float = FlightCalculator.estimated_glide_distance(plane.altitude, plane.calculate_lift(), plane.drag)
+    simulation = Simulation(
+        flight_system=flight_system,
+        time_step=TIME_STEP,
+    )
 
-        print(
-            f"Time: {time_elapsed:.1f}s | "
+    simulation.run()
 
-            f"Pitch Angle: {plane.pitch_angle:.2f}° | "
-            #f"Initial Pitch: {plane.pitch_angle} | "
-            f"Flight Path Angle: {plane.flight_path_angle():.2f}° | "
-            f"AoA: {plane.aoa:.2f}° | "
-
-            f"Altitude: {plane.altitude:.2f}m | "
-            f"estimated_distance: {estimated_distance:,.2f}m | "
-
-            f"horizontal Speed: {plane.horizontal_speed:.2f}m/s | "
-            f"Vertical Speed: {plane.vertical_speed:.2f}m/s | "
-            f"Total Speed: {total_speed:.2f} m/s | "
-
-            f"Lift: {plane.calculate_lift():.2f}N | "
-            f"Drag: {plane.drag:.2f}N | "
-
-            f"KE: {ke:,.2f}J | "
-            f"PE: {pe:,.2f}J | "
-            f"E: {energy:,.2f}J | "
-            f"Specific Energy: {specific_energy:,.2f}J/KG | "
-            f"Energy Rate: {energy_rate:,.2f}J | "
-            )
-
-        print(flight_analyzer.report())
-        
-    print("The plane has reached the ground.")
-
-    
 
 if __name__ == "__main__":
     main()
