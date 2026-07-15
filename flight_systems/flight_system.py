@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from config import GRAVITY
-
 from .flight_calculator import FlightCalculator
 
 if TYPE_CHECKING:
@@ -9,6 +8,7 @@ if TYPE_CHECKING:
     from .autopilot import AutoPilot
     from .flight_analyzer import FlightAnalyzer
     from .flight_controller import FlightController
+    from .flight_report import FlightReport
 
 
 class FlightSystem:
@@ -132,7 +132,7 @@ class FlightSystem:
             dt,
         )
 
-    def report(self) -> str:
+    def report(self) -> "FlightReport":
         """Returns the current flight analysis report."""
         return self.flight_analyzer.report()
 

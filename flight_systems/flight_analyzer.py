@@ -5,8 +5,8 @@ from .flight_report import FlightReport
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from plane import Plane
-    from autopilot import AutoPilot
+    from .plane import Plane
+    from .autopilot import AutoPilot
 
 
 class FlightAnalyzer:

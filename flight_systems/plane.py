@@ -54,9 +54,9 @@ class Plane:
         """In geometr: vyertical_speed = tan(Theta) x horizontal speed"""
         return tan(radians(self.pitch_angle)) * self.horizontal_speed
     
-    def calculate_next_vertical_speed(self, gravity: float, time_step: float) -> float:
+    def calculate_next_vertical_speed(self, acceleration: float, time_step: float) -> float:
         """final_velocity = initial_velocity + (acceleration x time)"""
-        return self.vertical_speed + (gravity * time_step)
+        return self.vertical_speed + (acceleration * time_step)
 
     def calculate_horizontal_speed(self, time_step: float) -> None:
         """

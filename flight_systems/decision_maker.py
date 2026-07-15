@@ -1,27 +1,18 @@
 class DecisionMaker:
     """
-    The brain of the autonomous pilot.
+    Interprets the FlightReport and chooses the aircraft's behavior.
 
-    Reads the FlightReport.
+    Reads:
+        FlightReport
 
-    Chooses the best strategy.
+    Returns:
+        Decision
 
-    Sends targets to the controllers.
-
-    DecisionMaker
-            │
-            ├── Reads FlightReport
-            ├── Chooses Strategy
-            └── Returns Commands
-
-    Ex: 
-    decision = decision_maker.make_decision(report)
-    autopilot.execute(decision)
+    It does not directly control the plane or FlightController.   
 
     Just for example than we can use something like this to make decision.
 
     mode = decision_maker.current_code()
-
     match mode:
         case TAKEOFF:
             ... 

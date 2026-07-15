@@ -2,7 +2,7 @@ from .flight_calculator import FlightCalculator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from plane import Plane
+    from .plane import Plane
 
 
 class FlightController:
@@ -36,7 +36,6 @@ class FlightController:
         throttle_change: float = FlightCalculator.clamp(throttle_error, -max_change, max_change)
         plane.throttle += throttle_change
 
-    def update_bank(self, plane: "Plane", dt: float):
+    def update_bank(self, plane: "Plane", dt: float) -> None:
         pass
-
 

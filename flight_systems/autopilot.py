@@ -4,7 +4,7 @@ from .flight_controller import FlightController
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from plane import Plane
+    from .plane import Plane
 
 
 class AutoPilot:
@@ -34,20 +34,12 @@ class AutoPilot:
         if plane.horizontal_speed < plane.min_safe_speed - self.speed_deadband:
             controller.target_pitch = -5.0
             controller.target_throttle = 1.0
-            #plane.thrust = plane.max_thrust
-            #plane.pitch_down(1.0)
             return
         
         # Priority 2: protect AoA & Stall protection
         if plane.aoa > self.max_safe_aoa:
             controller.target_pitch = -5.0
             controller.target_throttle = 1.0
-            # TODO: Much later:
-            # controller.update_pitch(plane, dt)
-            # controller.update_throttle(plane, dt)
-
-            #plane.set_throttle(1.0)
-            #plane.pitch_down(5.0)
             return
 
         # Priority 3: Altitude control
@@ -64,10 +56,10 @@ class AutoPilot:
         )
 
         if pitch_command > 0:                               # Apply controls depending on whether the plane needs to climb or descend
-            plane.set_throttle(0.7)
-            plane.pitch_up(pitch_command)
+            controller.target_pitch = pitch_command
+            controller.target_throttle = 0.7
         else:
-            plane.set_throttle(0.3)
-            plane.pitch_down(abs(pitch_command))
+            controller.target_pitch = pitch_command # if the answer isn't negetive I may need to make it like this: abs(pitch_command)
+            controller.target_throttle = 0.3
 
 

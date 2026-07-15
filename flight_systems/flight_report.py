@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from enums import ThreatType, RiskLevel, Recoverability, EnergyState
+    from .enums import ThreatType, RiskLevel, Recoverability, EnergyState
 
 
 class FlightReport:
