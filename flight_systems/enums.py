@@ -29,3 +29,12 @@ class EnergyState(Enum):
     EXCESSIVE = "EXCESSIVE"
 
 
+class FlightMode(Enum):
+    TAKEOFF = "TAKEOFF"
+    CLIMB = "CLIMB"
+    CRUISE = "CRUISE"
+    DESCENT = "DESCENT"
+    LANDING = "LANDING"
+    EMERGENCY = "EMERGENCY"
+
+

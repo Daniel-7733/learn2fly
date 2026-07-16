@@ -49,7 +49,7 @@ class AutoPilot:
             return
 
         pitch_command = altitude_error * self.altitude_gain # Calculate proportional pitch change based on altitude error
-        pitch_command = FlightCalculator.clamp(                        # Limit the calculated pitch command to safe operational boundaries
+        pitch_command = FlightCalculator.clamp(             # Limit the calculated pitch command to safe operational boundaries
             pitch_command,
             -self.max_pitch_command,
             self.max_pitch_command,
@@ -59,7 +59,7 @@ class AutoPilot:
             controller.target_pitch = pitch_command
             controller.target_throttle = 0.7
         else:
-            controller.target_pitch = pitch_command # if the answer isn't negetive I may need to make it like this: abs(pitch_command)
+            controller.target_pitch = pitch_command 
             controller.target_throttle = 0.3
 
 

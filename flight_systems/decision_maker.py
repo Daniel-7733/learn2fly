@@ -1,37 +1,32 @@
+from .decision import Decision
+from .enums import FlightMode, RiskLevel, ThreatType
+from .flight_report import FlightReport
+
+
 class DecisionMaker:
     """
-    Interprets the FlightReport and chooses the aircraft's behavior.
-
-    Reads:
-        FlightReport
-
-    Returns:
-        Decision
-
-    It does not directly control the plane or FlightController.   
-
-    Just for example than we can use something like this to make decision.
-
-    mode = decision_maker.current_code()
-    match mode:
-        case TAKEOFF:
-            ... 
-        case CLIMB:
-            ...
-        case CRUISE:
-            ...
-        case DESCENT:
-            ...
-        case LANDING:
-            ...
-        case EMERGENCY:
-            ...
-
-    So in another word, DecisionMaker "Given my current state, what behavior should I have?"
-
+    Interprets the FlightReport and chooses the aircraft's behavior. In another words, Reads a FlightReport and returns a Decision.
+    responsibility of DecisionMaker is to creates meaning
     """
-
     def __init__(self) -> None:
         pass
+
+    def make_decision(self, report: FlightReport) -> Decision:
+        if report.risk is RiskLevel.CRITICAL:
+            return Decision(
+                mode=FlightMode.EMERGENCY,
+                reason=report.most_urgent_threat,
+                priority=report.risk,
+                message="Critical flight condition detected.",
+                confidence=1.0,
+            )
+
+        return Decision(
+            mode=FlightMode.CRUISE,
+            reason=ThreatType.NONE,
+            priority=report.risk,
+            message="The aircraft is operating normally.",
+            confidence=1.0,
+        )
 
 
