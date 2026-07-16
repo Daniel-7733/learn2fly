@@ -13,6 +13,8 @@ class ThreatType(Enum):
     STALL = "STALL"
     IMPACT = "IMPACT"
     OVERSPEED = "OVERSPEED"
+    LOW_SPEED = "LOW_SPEED"
+    ENERGY_LOSS = "ENERGY_LOSS"
 
 
 class Recoverability(Enum):

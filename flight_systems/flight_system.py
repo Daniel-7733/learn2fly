@@ -6,9 +6,10 @@ from .flight_calculator import FlightCalculator
 if TYPE_CHECKING:
     from .plane import Plane
     from .autopilot import AutoPilot
+    from .flight_report import FlightReport
+    from .decision_maker import DecisionMaker
     from .flight_analyzer import FlightAnalyzer
     from .flight_controller import FlightController
-    from .flight_report import FlightReport
 
 
 class FlightSystem:
@@ -18,11 +19,12 @@ class FlightSystem:
     One call to update(dt) advances the aircraft by one time step.
     """
 
-    def __init__(self, plane: "Plane", autopilot: "AutoPilot", flight_analyzer: "FlightAnalyzer", flight_controller: "FlightController") -> None:
+    def __init__(self, plane: "Plane", autopilot: "AutoPilot", flight_analyzer: "FlightAnalyzer", flight_controller: "FlightController", decision_maker: "DecisionMaker") -> None:
         self.plane = plane
         self.autopilot = autopilot
         self.flight_analyzer = flight_analyzer
         self.flight_controller = flight_controller
+        self.decision_maker = decision_maker
 
         initial_total_speed = FlightCalculator.total_speed(
             self.plane.horizontal_speed,
@@ -52,9 +54,15 @@ class FlightSystem:
 
         if dt <= 0:
             raise ValueError("dt must be greater than zero.")
+        # ---------------------------------------------------------
+        # 1. Create the report before the autopilot acts
+        # ---------------------------------------------------------
+
+        report = self.flight_analyzer.report()
+        decision = self.decision_maker.make_decision(report)
 
         # ---------------------------------------------------------
-        # 1. Preserve values from the previous frame
+        # 2. Preserve values from the previous frame
         # ---------------------------------------------------------
 
         previous_aoa = self.plane.aoa
@@ -62,7 +70,7 @@ class FlightSystem:
         previous_total_energy = self.current_energy
 
         # ---------------------------------------------------------
-        # 2. Autopilot chooses control targets
+        # 3. Autopilot chooses control targets
         # ---------------------------------------------------------
         #
         # The autopilot should not directly change pitch or throttle.
@@ -73,11 +81,12 @@ class FlightSystem:
         #
         self.autopilot.update(
             self.plane,
+            decision,
             self.flight_controller,
         )
 
         # ---------------------------------------------------------
-        # 3. Controller moves toward those targets smoothly
+        # 4. Controller moves toward those targets smoothly
         # ---------------------------------------------------------
 
         self.flight_controller.update_pitch(self.plane, dt)
@@ -87,13 +96,13 @@ class FlightSystem:
         # self.flight_controller.update_bank(self.plane, dt)
 
         # ---------------------------------------------------------
-        # 4. Physics responds to the control changes
+        # 5. Physics responds to the control changes
         # ---------------------------------------------------------
 
         self.plane.update_physics(GRAVITY, dt)
 
         # ---------------------------------------------------------
-        # 5. Update derived flight values
+        # 6. Update derived flight values
         # ---------------------------------------------------------
 
         self.plane.aoa_rate = FlightCalculator.rate_of_change(

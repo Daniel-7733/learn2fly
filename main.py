@@ -33,6 +33,7 @@ from flight_systems.autopilot import AutoPilot
 from flight_systems.flight_analyzer import FlightAnalyzer
 from flight_systems.flight_controller import FlightController
 from flight_systems.flight_system import FlightSystem
+from flight_systems.decision_maker import DecisionMaker
 
 from simulations.simulation import Simulation
 
@@ -67,8 +68,15 @@ def main() -> None:
         autopilot,
     )
 
+
     # ---------------------------------------------------------
-    # 3. Connect them through FlightSystem
+    # 3. Create DecisionMaker
+    # ---------------------------------------------------------
+
+    decision_maker = DecisionMaker()
+
+    # ---------------------------------------------------------
+    # 4. Connect them through FlightSystem
     # ---------------------------------------------------------
 
     flight_system = FlightSystem(
@@ -76,6 +84,7 @@ def main() -> None:
         autopilot=autopilot,
         flight_analyzer=flight_analyzer,
         flight_controller=flight_controller,
+        decision_maker=decision_maker
     )
 
     # ---------------------------------------------------------
