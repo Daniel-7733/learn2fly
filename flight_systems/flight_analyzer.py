@@ -109,6 +109,38 @@ class FlightAnalyzer:
 
         return ThreatType.NONE
 
+    def determine_most_urgent_threat(self, altitude: float, speed_margin: float, aoa_margin: float, time_to_stall: float, time_to_impact: float) -> ThreatType:
+        """
+        Determines the aircraft's most urgent current threat.
+
+        Crossed boundaries are checked before future countdowns.
+        """
+
+        # The aircraft has reached or crossed the ground.
+        if altitude <= 0:
+            return ThreatType.IMPACT
+
+        # Immediate terrain collision is now the dominant danger.
+        if time_to_impact <= 2.0:
+            return ThreatType.IMPACT
+
+        # The aircraft is already beyond the critical AoA.
+        if aoa_margin <= 0:
+            return ThreatType.STALL
+
+        # Later, after adding LOW_SPEED to ThreatType:
+        # if speed_margin <= 0:
+        #     return ThreatType.LOW_SPEED
+
+        # Compare future dangers only when boundaries are not crossed.
+        if time_to_stall < time_to_impact:
+            return ThreatType.STALL
+
+        if time_to_impact < time_to_stall:
+            return ThreatType.IMPACT
+
+        return ThreatType.NONE
+
     def calculate_risk_level(self, speed_margin: float, aoa_margin: float, time_to_stall: float, time_to_impact: float) -> RiskLevel:
         """So, this function answer to this question: How serious is the whole situation?"""
 
@@ -193,7 +225,13 @@ class FlightAnalyzer:
             self.plane.vertical_speed,
         )
 
-        most_urgent_threat = self.urgency_variable(time_to_stall, time_to_impact)
+        most_urgent_threat = self.determine_most_urgent_threat(
+            altitude=self.plane.altitude,
+            speed_margin=speed_margin,
+            aoa_margin=aoa_margin,
+            time_to_stall=time_to_stall,
+            time_to_impact=time_to_impact,
+        )
 
         risk = self.calculate_risk_level(
             speed_margin,

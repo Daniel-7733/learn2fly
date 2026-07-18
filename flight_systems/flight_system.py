@@ -38,6 +38,12 @@ class FlightSystem:
             initial_total_speed,
         )
 
+        self.plane.specific_energy = FlightCalculator.specific_energy(
+            GRAVITY,
+            self.plane.altitude,
+            initial_total_speed,
+        )
+
         self.energy_rate: float = 0.0
 
     def update(self, dt: float) -> None:

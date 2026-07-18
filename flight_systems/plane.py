@@ -33,20 +33,28 @@ class Plane:
         self.energy_rate = 0.0
 
     def update_physics(self, gravity: float, time_step: float) -> None:
+        # Update horizontal motion and forces.
         self.calculate_horizontal_speed(time_step)
+
+        # Calculate the AoA used for this physics step.
         self.aoa = self.calculate_aoa()
 
-        lift_force: float = self.calculate_lift()
-        vertical_drag: float = self.calculate_vertical_drag()
+        lift_force = self.calculate_lift()
+        vertical_drag = self.calculate_vertical_drag()
 
-        lift_acceleration: float = (lift_force + vertical_drag) / self.mass
-        net_acceleration: float = gravity + lift_acceleration
+        lift_acceleration = (lift_force + vertical_drag) / self.mass
+        net_acceleration = gravity + lift_acceleration
 
-        self.vertical_speed: float = self.calculate_next_vertical_speed(net_acceleration, time_step)
-        self.altitude += self.vertical_speed * time_step 
+        # Update vertical motion.
+        self.vertical_speed = self.calculate_next_vertical_speed(net_acceleration, time_step)
+
+        self.altitude += self.vertical_speed * time_step
 
         if self.altitude < 0:
-            self.altitude = 0 
+            self.altitude = 0.0
+
+        # Refresh AoA so stored telemetry matches the new aircraft state.
+        self.aoa = self.calculate_aoa()
 
 
     # ================ Speed functions =============== #
