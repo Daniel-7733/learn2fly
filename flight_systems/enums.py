@@ -11,9 +11,9 @@ class RiskLevel(Enum):
 class ThreatType(Enum):
     NONE = "NONE"
     STALL = "STALL"
+    LOW_SPEED = "LOW_SPEED"
     IMPACT = "IMPACT"
     OVERSPEED = "OVERSPEED"
-    LOW_SPEED = "LOW_SPEED"
     ENERGY_LOSS = "ENERGY_LOSS"
 
 

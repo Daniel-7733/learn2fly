@@ -5,6 +5,7 @@ from .flight_calculator import FlightCalculator
 
 if TYPE_CHECKING:
     from .plane import Plane
+    from .decision import Decision
     from .autopilot import AutoPilot
     from .flight_report import FlightReport
     from .decision_maker import DecisionMaker
@@ -46,6 +47,9 @@ class FlightSystem:
 
         self.energy_rate: float = 0.0
 
+        self.current_report: "FlightReport | None" = None
+        self.current_decision: "Decision | None" = None
+
     def update(self, dt: float) -> None:
         """
         Advances the complete flight system by one time step.
@@ -64,8 +68,8 @@ class FlightSystem:
         # 1. Create the report before the autopilot acts
         # ---------------------------------------------------------
 
-        report = self.flight_analyzer.report()
-        decision = self.decision_maker.make_decision(report)
+        self.current_report = self.flight_analyzer.report()
+        self.current_decision = self.decision_maker.make_decision(self.current_report)
 
         # ---------------------------------------------------------
         # 2. Preserve values from the previous frame
@@ -87,7 +91,7 @@ class FlightSystem:
         #
         self.autopilot.update(
             self.plane,
-            decision,
+            self.current_decision,
             self.flight_controller,
         )
 
@@ -148,8 +152,18 @@ class FlightSystem:
         )
 
     def report(self) -> "FlightReport":
-        """Returns the current flight analysis report."""
-        return self.flight_analyzer.report()
+        """Returns the most recently generated flight report."""
+
+        if self.current_report is None:
+            raise RuntimeError("No FlightReport exists before the first update.")
+        return self.current_report
+
+    def decision(self) -> "Decision":
+        """Returns the most recently selected flight decision."""
+
+        if self.current_decision is None:
+            raise RuntimeError("No Decision exists before the first update.")
+        return self.current_decision
 
     def telemetry(self) -> str:
         """Creates a readable snapshot of the current aircraft state."""
@@ -183,17 +197,17 @@ class FlightSystem:
         )
 
         return (
-            f"Pitch Angle: {self.plane.pitch_angle:.2f}° | "
+            f"\nPitch Angle: {self.plane.pitch_angle:.2f}° | "
             f"Flight Path Angle: {self.plane.flight_path_angle():.2f}° | "
             f"AoA: {self.plane.aoa:.2f}° | "
-            f"AoA Rate: {self.plane.aoa_rate:.2f}°/s | "
+            f"AoA Rate: {self.plane.aoa_rate:.2f}°/s | \n"
             f"Altitude: {self.plane.altitude:.2f} m | "
-            f"Estimated Glide Distance: {estimated_distance:,.2f} m | "
+            f"Estimated Glide Distance: {estimated_distance:,.2f} m | \n"
             f"Horizontal Speed: {self.plane.horizontal_speed:.2f} m/s | "
             f"Vertical Speed: {self.plane.vertical_speed:.2f} m/s | "
-            f"Total Speed: {total_speed:.2f} m/s | "
+            f"Total Speed: {total_speed:.2f} m/s | \n"
             f"Lift: {self.plane.calculate_lift():.2f} N | "
-            f"Drag: {self.plane.drag:.2f} N | "
+            f"Drag: {self.plane.drag:.2f} N | \n"
             f"KE: {kinetic_energy:,.2f} J | "
             f"PE: {potential_energy:,.2f} J | "
             f"Total Energy: {self.current_energy:,.2f} J | "

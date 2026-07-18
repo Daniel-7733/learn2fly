@@ -10,7 +10,15 @@ class Decision:
     It communicates what the aircraft should do, why it should do it,
     and how urgent the decision is.
 
-    responsibility of Decision is to stores meaning.
+    Responsibility of Decision is to stores meaning.
+
+    Stores the result produced by DecisionMaker.
+
+    It communicates:
+    - what mode the aircraft should use,
+    - why the mode was selected,
+    - how urgent the situation is,
+    - and a readable explanation.
 
     example usage: 
         Decision(
@@ -29,4 +37,14 @@ class Decision:
         self.message = message
         self.confidence = confidence
 
+    def __str__(self) -> str:
+        return (
+            "============ Decision Details ============\n"
+            f"Mode: {self.mode.value} | \n"
+            f"Reason: {self.reason.value} | \n"
+            f"Priority: {self.priority.value} | \n"
+            f"Message: {self.message} | \n"
+            f"Confidence: {self.confidence} | \n"
+            "==========================================\n"
+        )
 

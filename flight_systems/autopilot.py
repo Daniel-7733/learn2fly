@@ -41,8 +41,12 @@ class AutoPilot:
         # ---------------------------------------------------------
 
         if decision.mode is FlightMode.EMERGENCY:
-
             if decision.reason is ThreatType.STALL:
+                controller.target_pitch = -5.0
+                controller.target_throttle = 1.0
+                return
+
+            if decision.reason is ThreatType.LOW_SPEED:
                 controller.target_pitch = -5.0
                 controller.target_throttle = 1.0
                 return

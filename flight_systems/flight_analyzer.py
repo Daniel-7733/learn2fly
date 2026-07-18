@@ -128,9 +128,9 @@ class FlightAnalyzer:
         if aoa_margin <= 0:
             return ThreatType.STALL
 
-        # Later, after adding LOW_SPEED to ThreatType:
-        # if speed_margin <= 0:
-        #     return ThreatType.LOW_SPEED
+        # low speed can be identified.
+        if speed_margin <= 0:
+            return ThreatType.LOW_SPEED
 
         # Compare future dangers only when boundaries are not crossed.
         if time_to_stall < time_to_impact:

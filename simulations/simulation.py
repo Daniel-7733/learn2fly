@@ -45,7 +45,8 @@ class Simulation:
 
     def display_status(self) -> None:
         """Displays telemetry and the analyzer's report."""
-
+        print(self.flight_system.report())
+        print(self.flight_system.decision())
         print(
             f"Time: {self.time_elapsed:.1f} s | "
             f"{self.flight_system.telemetry()}"
