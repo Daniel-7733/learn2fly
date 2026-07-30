@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .enums import FlightMode, ThreatType, RiskLevel
+    from flight_systems.enums import FlightMode, ThreatType, RiskLevel
 
 
 class Decision:

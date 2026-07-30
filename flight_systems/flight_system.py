@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING
 
 from config import GRAVITY
-from .flight_calculator import FlightCalculator
+from flight_calculator import FlightCalculator
 
 if TYPE_CHECKING:
-    from .plane import Plane
-    from .decision import Decision
-    from .autopilot import AutoPilot
-    from .flight_report import FlightReport
-    from .decision_maker import DecisionMaker
-    from .flight_analyzer import FlightAnalyzer
-    from .flight_controller import FlightController
+    from plane import Plane
+    from flight_systems.decisions.decision import Decision
+    from autopilot import AutoPilot
+    from flight_report import FlightReport
+    from flight_systems.decisions.decision_maker import DecisionMaker
+    from flight_analyzer import FlightAnalyzer
+    from flight_controller import FlightController
 
 
 class FlightSystem:

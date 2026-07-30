@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
-from .flight_calculator import FlightCalculator
-from .enums import FlightMode, ThreatType
+from flight_calculator import FlightCalculator
+from enums import FlightMode, ThreatType
 
 if TYPE_CHECKING:
-    from .plane import Plane
-    from .decision import Decision
-    from .flight_controller import FlightController
+    from plane import Plane
+    from flight_systems.decisions.decision import Decision
+    from flight_controller import FlightController
 
 
 class AutoPilot:

@@ -1,6 +1,8 @@
-from .decision import Decision
-from .enums import FlightMode, RiskLevel, ThreatType
-from .flight_report import FlightReport
+from flight_systems.decisions.decision import Decision
+from flight_systems.enums import FlightMode, RiskLevel, ThreatType
+from flight_systems.flight_report import FlightReport
+from flight_systems.decisions.states.cruise_state import CruiseState
+from flight_systems.decisions.states.flight_state import FlightState
 
 
 class DecisionMaker:
@@ -28,6 +30,15 @@ class DecisionMaker:
         self.current_mode = FlightMode.CRUISE
 
     def make_decision(self, report: FlightReport) -> Decision:
+        return self.current_state.handle(self, report)
+
+    def change_state(self, new_state: FlightState) -> None:
+        self.current_state = new_state
+
+# ======================================================================
+#  These blow functions won't be used again
+# ======================================================================
+    def make_decision_(self, report: FlightReport) -> Decision:
         """
         Selects a decision based on the current mode and flight report.
         """

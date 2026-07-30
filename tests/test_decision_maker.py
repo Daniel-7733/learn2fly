@@ -1,7 +1,8 @@
 import pytest
-from flight_systems.decision_maker import DecisionMaker
+from flight_systems.decisions.decision_maker import DecisionMaker
 from flight_systems.flight_report import FlightReport
 from flight_systems.enums import RiskLevel, ThreatType, FlightMode, Recoverability, EnergyState
+from flight_systems.decisions.states.emergency_state import EmergencyState
 
 
 # ==================================================================
@@ -92,6 +93,8 @@ def test_make_decision(report: FlightReport, expected_mode: FlightMode, expected
     decision_maker = DecisionMaker()
     decision = decision_maker.make_decision(report)
 
+    assert decision.mode is FlightMode.EMERGENCY
+    assert isinstance(decision_maker.current_state, EmergencyState)
     assert decision.mode is expected_mode
     assert decision.reason is expected_reason
     assert decision.priority is expected_priority
