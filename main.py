@@ -8,23 +8,29 @@
                 Force Measurement: N
 
             classes and there duties
-                Plane:
-                    State of aircraft & stores state
-
                 FlightCalculator:
                     Physics calculations & computes physics
-
-                AutoPilot:
-                    makes decisions
-
-                FlightAnalyzer
-                    interprets state
 
                 FlightReport:
                     Presentation
 
                 MissionPlanner:
                     Goals
+
+                FlightAnalyzer:
+                    Interprets aircraft state and produces FlightReport
+
+                DecisionMaker:
+                    Selects flight mode and strategy
+
+                AutoPilot:
+                    Translates Decision into controller targets
+
+                FlightController:
+                    Smoothly moves controls toward targets
+
+                Plane:
+                    Stores aircraft state and updates physics
 """
 from config import TIME_STEP
 
@@ -33,7 +39,7 @@ from flight_systems.autopilot import AutoPilot
 from flight_systems.flight_analyzer import FlightAnalyzer
 from flight_systems.flight_controller import FlightController
 from flight_systems.flight_system import FlightSystem
-from flight_systems.decision_maker import DecisionMaker
+from flight_systems.decisions.decision_maker import DecisionMaker
 
 from simulations.simulation import Simulation
 

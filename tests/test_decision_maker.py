@@ -93,7 +93,6 @@ def test_make_decision(report: FlightReport, expected_mode: FlightMode, expected
     decision_maker = DecisionMaker()
     decision = decision_maker.make_decision(report)
 
-    assert decision.mode is FlightMode.EMERGENCY
     assert isinstance(decision_maker.current_state, EmergencyState)
     assert decision.mode is expected_mode
     assert decision.reason is expected_reason

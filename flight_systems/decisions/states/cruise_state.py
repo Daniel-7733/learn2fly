@@ -23,7 +23,7 @@ class CruiseState(FlightState):
             return Decision(
                 mode=FlightMode.EMERGENCY,
                 priority=report.risk,
-                reason=report.threat,
+                reason=report.most_urgent_threat,
                 message="Entering emergency mode.",
                 confidence=1.0
             )

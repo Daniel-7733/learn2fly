@@ -255,7 +255,6 @@ class FlightAnalyzer:
         recoverability = self.classify_recoverability(recovery_margin)
 
 
-        specific_energy_score = self.calculate_specific_energy_score(self.plane.specific_energy)
         energy_state = self.calculate_specific_energy_level(self.plane.specific_energy)
 
         return FlightReport(

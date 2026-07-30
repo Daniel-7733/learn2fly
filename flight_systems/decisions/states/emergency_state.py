@@ -28,7 +28,7 @@ class EmergencyState(FlightState):
         return Decision(
             mode=FlightMode.EMERGENCY,
             priority=report.risk,
-            reason=report.threat,
+            reason=report.most_urgent_threat,
             message="Remaining in emergency mode.",
             confidence=1.0
         )

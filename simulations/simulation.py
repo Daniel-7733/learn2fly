@@ -52,7 +52,6 @@ class Simulation:
             f"{self.flight_system.telemetry()}"
         )
 
-        print(self.flight_system.report())
         print("-" * 100)
 
 
