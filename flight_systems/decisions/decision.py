@@ -40,11 +40,11 @@ class Decision:
     def __str__(self) -> str:
         return (
             "============ Decision Details ============\n"
-            f"Mode: {self.mode.value} | \n"
-            f"Reason: {self.reason.value} | \n"
-            f"Priority: {self.priority.value} | \n"
-            f"Message: {self.message} | \n"
-            f"Confidence: {self.confidence} | \n"
+            f"Mode: {self.mode.value} \n"
+            f"Reason: {self.reason.value} \n"
+            f"Priority: {self.priority.value} \n"
+            f"Message: {self.message} \n"
+            f"Confidence: {self.confidence} \n"
             "==========================================\n"
         )
 

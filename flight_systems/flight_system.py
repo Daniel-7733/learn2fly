@@ -47,7 +47,7 @@ class FlightSystem:
 
         self.energy_rate: float = 0.0
 
-        self.current_report: "FlightReport | None" = None
+        self.decision_report: "FlightReport | None" = None
         self.current_decision: "Decision | None" = None
 
     def update(self, dt: float) -> None:
@@ -68,14 +68,14 @@ class FlightSystem:
         # 1. Create the report before the autopilot acts
         # ---------------------------------------------------------
 
-        self.current_report = self.flight_analyzer.report()
-        self.current_decision = self.decision_maker.make_decision(self.current_report)
+        self.decision_report = self.flight_analyzer.report()
+        self.current_decision = self.decision_maker.make_decision(self.decision_report)
 
         # ---------------------------------------------------------
         # 2. Preserve values from the previous frame
         # ---------------------------------------------------------
 
-        previous_aoa = self.plane.aoa
+        #previous_aoa = self.plane.aoa
         previous_specific_energy = self.plane.specific_energy
         previous_total_energy = self.current_energy
 
@@ -115,11 +115,11 @@ class FlightSystem:
         # 6. Update derived flight values
         # ---------------------------------------------------------
 
-        self.plane.aoa_rate = FlightCalculator.rate_of_change(
-            previous_aoa,
-            self.plane.aoa,
-            dt,
-        )
+        #self.plane.aoa_rate = FlightCalculator.rate_of_change(
+            #previous_aoa,
+            #self.plane.aoa,
+            #dt,
+        #)
 
         total_speed = FlightCalculator.total_speed(
             self.plane.horizontal_speed,
@@ -154,9 +154,9 @@ class FlightSystem:
     def report(self) -> "FlightReport":
         """Returns the most recently generated flight report."""
 
-        if self.current_report is None:
+        if self.decision_report is None:
             raise RuntimeError("No FlightReport exists before the first update.")
-        return self.current_report
+        return self.decision_report
 
     def decision(self) -> "Decision":
         """Returns the most recently selected flight decision."""

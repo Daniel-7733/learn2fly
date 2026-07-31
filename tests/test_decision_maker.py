@@ -1,8 +1,16 @@
 import pytest
 from flight_systems.decisions.decision_maker import DecisionMaker
-from flight_systems.flight_report import FlightReport
-from flight_systems.enums import RiskLevel, ThreatType, FlightMode, Recoverability, EnergyState
+from flight_systems.decisions.states.cruise_state import CruiseState
 from flight_systems.decisions.states.emergency_state import EmergencyState
+from flight_systems.decisions.states.flight_state import FlightState
+from flight_systems.enums import (
+    EnergyState,
+    FlightMode,
+    Recoverability,
+    RiskLevel,
+    ThreatType,
+)
+from flight_systems.flight_report import FlightReport
 
 
 # ==================================================================
@@ -23,7 +31,13 @@ from flight_systems.decisions.states.emergency_state import EmergencyState
 # ==================================================================
 
 @pytest.mark.parametrize(
-    "report, expected_mode, expected_reason, expected_priority",
+    (
+        "report",
+        "expected_state_type",
+        "expected_mode",
+        "expected_reason",
+        "expected_priority",
+    ),
     [
         # ==================================
         #     Critical predicted stall
@@ -41,6 +55,7 @@ from flight_systems.decisions.states.emergency_state import EmergencyState
                 recoverability=Recoverability.POOR,
                 energy_state=EnergyState.LOW,
             ),
+            EmergencyState,
             FlightMode.EMERGENCY,
             ThreatType.STALL,
             RiskLevel.CRITICAL,
@@ -62,6 +77,7 @@ from flight_systems.decisions.states.emergency_state import EmergencyState
                 recoverability=Recoverability.IMPOSSIBLE,
                 energy_state=EnergyState.MODERATE,
             ),
+            EmergencyState,
             FlightMode.EMERGENCY,
             ThreatType.IMPACT,
             RiskLevel.CRITICAL,
@@ -83,18 +99,66 @@ from flight_systems.decisions.states.emergency_state import EmergencyState
                 recoverability=Recoverability.EXCELLENT,
                 energy_state=EnergyState.HIGH,
             ),
+            CruiseState,
             FlightMode.CRUISE,
             ThreatType.NONE,
             RiskLevel.LOW,
         ),
     ],
 )
-def test_make_decision(report: FlightReport, expected_mode: FlightMode, expected_reason: ThreatType, expected_priority: RiskLevel) -> None:
+def test_make_decision(report: FlightReport, expected_state_type: type[FlightState], expected_mode: FlightMode, 
+                       expected_reason: ThreatType, expected_priority: RiskLevel) -> None:
     decision_maker = DecisionMaker()
+
     decision = decision_maker.make_decision(report)
 
-    assert isinstance(decision_maker.current_state, EmergencyState)
+    assert isinstance(
+        decision_maker.current_state,
+        expected_state_type,
+    )
     assert decision.mode is expected_mode
     assert decision.reason is expected_reason
     assert decision.priority is expected_priority
+
+def test_cruise_to_emergency_and_back_to_cruise() -> None:
+    decision_maker = DecisionMaker()
+
+    critical_report = FlightReport(
+        speed_margin=10.0,
+        aoa_margin=3.0,
+        altitude=5000.0,
+        time_to_stall=1.5,
+        time_to_impact=30.0,
+        most_urgent_threat=ThreatType.STALL,
+        risk=RiskLevel.CRITICAL,
+        recoverability=Recoverability.POOR,
+        energy_state=EnergyState.LOW,
+    )
+
+    safe_report = FlightReport(
+        speed_margin=50.0,
+        aoa_margin=10.0,
+        altitude=3000.0,
+        time_to_stall=99.0,
+        time_to_impact=99.0,
+        most_urgent_threat=ThreatType.NONE,
+        risk=RiskLevel.LOW,
+        recoverability=Recoverability.EXCELLENT,
+        energy_state=EnergyState.HIGH,
+    )
+
+    # The DecisionMaker begins in cruise.
+    assert isinstance(decision_maker.current_state, CruiseState)
+
+    # Critical danger changes CruiseState into EmergencyState.
+    emergency_decision = decision_maker.make_decision(critical_report)
+
+    assert isinstance(decision_maker.current_state, EmergencyState)
+    assert emergency_decision.mode is FlightMode.EMERGENCY
+
+    # Safe flight changes EmergencyState back into CruiseState.
+    cruise_decision = decision_maker.make_decision(safe_report)
+
+    assert isinstance(decision_maker.current_state, CruiseState)
+    assert cruise_decision.mode is FlightMode.CRUISE
 

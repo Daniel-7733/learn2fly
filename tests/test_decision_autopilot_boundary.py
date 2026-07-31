@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import pytest
 
 from flight_systems.autopilot import AutoPilot
-from flight_systems.decision_maker import DecisionMaker
+from flight_systems.decisions.decision_maker import DecisionMaker
 from flight_systems.enums import (
     EnergyState,
     FlightMode,
