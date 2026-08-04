@@ -154,15 +154,28 @@ class Plane:
         return -self.vertical_speed * drag_factor
 
     def calculate_lift(self) -> float:
-        """This is a very simple calculation about lifting. More complex one will be added next time."""
-        lift_factor: float = 0.01
+        """Calculate simplified aerodynamic lift. 
+        The real formula is L=1/2pv^2SCL
+        Where:
+
+        ρ is air density;
+        v is airspeed;
+        S is wing area;
+        CL is the lift coefficient.
+        """
+
+        lift_factor: float = 0.00543
 
         if self.aoa <= self.critical_aoa:
             effective_aoa = self.aoa
-        else: # if angle is more then stall angle the plane loss its effective angle and enter at stall angle
-            effective_aoa = max(0, self.critical_aoa - (self.aoa - self.critical_aoa))
+        else:
+            stall_excess = self.aoa - self.critical_aoa
+            effective_aoa = max(
+                0.0,
+                self.critical_aoa - stall_excess,
+            )
 
-        return effective_aoa * self.horizontal_speed * lift_factor
+        return lift_factor * (self.horizontal_speed**2) * effective_aoa
         
     def set_throttle(self, value: float) -> None:
         """Sets the engine throttle while keeping the value between 0.0 and 1.0."""

@@ -1,3 +1,6 @@
+from math import hypot
+
+
 class FlightCalculator:
     """
     FlightCalculator = formulas
@@ -51,8 +54,9 @@ class FlightCalculator:
             return 0.0
         return altitude * (lift / drag)
     
+
     @staticmethod
-    def total_speed(horizontal_speed: float, vertical_speed: float) -> float:
+    def calculate_airspeed(horizontal_speed: float, vertical_speed: float) -> float:
         """
         This function calculate the both speeds and return total speed. How did I find this formula:
 
@@ -62,7 +66,7 @@ class FlightCalculator:
 
         So, this is the formula -> (Vx^2 + Vy^2)^0.5
         """
-        return (horizontal_speed**2 + vertical_speed**2) ** 0.5
+        return hypot(horizontal_speed,vertical_speed)
 
     @staticmethod
     def rate_of_change(previous_value: float, current_value: float, time_step: float) -> float:

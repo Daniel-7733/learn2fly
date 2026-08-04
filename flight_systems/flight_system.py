@@ -27,7 +27,7 @@ class FlightSystem:
         self.flight_controller = flight_controller
         self.decision_maker = decision_maker
 
-        initial_total_speed = FlightCalculator.total_speed(
+        initial_airspeed = FlightCalculator.calculate_airspeed(
             self.plane.horizontal_speed,
             self.plane.vertical_speed,
         )
@@ -36,13 +36,13 @@ class FlightSystem:
             self.plane.mass,
             GRAVITY,
             self.plane.altitude,
-            initial_total_speed,
+            initial_airspeed,
         )
 
         self.plane.specific_energy = FlightCalculator.specific_energy(
             GRAVITY,
             self.plane.altitude,
-            initial_total_speed,
+            initial_airspeed,
         )
 
         self.energy_rate: float = 0.0
@@ -121,7 +121,7 @@ class FlightSystem:
             #dt,
         #)
 
-        total_speed = FlightCalculator.total_speed(
+        airspeed = FlightCalculator.calculate_airspeed(
             self.plane.horizontal_speed,
             self.plane.vertical_speed,
         )
@@ -129,7 +129,7 @@ class FlightSystem:
         self.plane.specific_energy = FlightCalculator.specific_energy(
             GRAVITY,
             self.plane.altitude,
-            total_speed,
+            airspeed,
         )
 
         self.plane.energy_rate = FlightCalculator.rate_of_change(
@@ -142,7 +142,7 @@ class FlightSystem:
             self.plane.mass,
             GRAVITY,
             self.plane.altitude,
-            total_speed,
+            airspeed,
         )
 
         self.energy_rate = FlightCalculator.rate_of_change(
@@ -168,14 +168,14 @@ class FlightSystem:
     def telemetry(self) -> str:
         """Creates a readable snapshot of the current aircraft state."""
 
-        total_speed = FlightCalculator.total_speed(
+        airspeed = FlightCalculator.calculate_airspeed(
             self.plane.horizontal_speed,
             self.plane.vertical_speed,
         )
 
         kinetic_energy = FlightCalculator.kinetic_energy(
             self.plane.mass,
-            total_speed,
+            airspeed,
         )
 
         potential_energy = FlightCalculator.potential_energy(
@@ -187,7 +187,7 @@ class FlightSystem:
         specific_energy = FlightCalculator.specific_energy(
             GRAVITY,
             self.plane.altitude,
-            total_speed,
+            airspeed,
         )
 
         estimated_distance = FlightCalculator.estimated_glide_distance(
@@ -205,7 +205,7 @@ class FlightSystem:
             f"Estimated Glide Distance: {estimated_distance:,.2f} m | \n"
             f"Horizontal Speed: {self.plane.horizontal_speed:.2f} m/s | "
             f"Vertical Speed: {self.plane.vertical_speed:.2f} m/s | "
-            f"Total Speed: {total_speed:.2f} m/s | \n"
+            f"Total Speed: {airspeed:.2f} m/s | \n"
             f"Lift: {self.plane.calculate_lift():.2f} N | "
             f"Drag: {self.plane.drag:.2f} N | \n"
             f"KE: {kinetic_energy:,.2f} J | "
