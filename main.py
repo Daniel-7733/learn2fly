@@ -54,6 +54,7 @@ def main() -> None:
         horizontal_speed=85.0,
         pitch_angle=10.0,
         mass=20.0,
+        max_thrust=100.0,
     )
 
     # ---------------------------------------------------------

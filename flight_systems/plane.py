@@ -3,7 +3,7 @@ from math import tan, radians, atan2, degrees
 
 class Plane:
     def __init__(self, altitude: float, horizontal_speed: float, pitch_angle: float, mass: float,
-                 min_safe_speed: float = 50, critical_aoa: float = 15) -> None:
+                 min_safe_speed: float = 50, critical_aoa: float = 15, max_thrust: float = 100) -> None:
         # ===== altitude veriable ===== #
         self.altitude = altitude
         
@@ -25,7 +25,7 @@ class Plane:
         # ===== Force veriables ==== #
         self.drag: float = 0
         self.throttle: float = 0.5  # 0.0 to 1.0 (0% engine power)
-        self.max_thrust: float = 100
+        self.max_thrust: float = max_thrust
         self.thrust: float = 0
 
         # ===== Energy veriables ==== #
@@ -73,11 +73,11 @@ class Plane:
         """In geometr: vyertical_speed = tan(Theta) x horizontal speed"""
         return tan(radians(self.pitch_angle)) * self.horizontal_speed
     
-    def calculate_next_vertical_speed(self, acceleration: float, time_step: float) -> float:
+    def calculate_next_vertical_speed(self, acceleration: float, dt: float) -> float:
         """final_velocity = initial_velocity + (acceleration x time)"""
-        return self.vertical_speed + (acceleration * time_step)
+        return self.vertical_speed + (acceleration * dt)
 
-    def calculate_horizontal_speed(self, time_step: float) -> None:
+    def calculate_horizontal_speed(self, dt: float) -> None:
         """
         f = ma -> a = f/m
         Vf = Vi + at
@@ -87,7 +87,7 @@ class Plane:
 
         net_force: float = self.thrust - self.drag
         acceleration: float = net_force / self.mass
-        self.horizontal_speed += acceleration * time_step
+        self.horizontal_speed += acceleration * dt
 
         if self.horizontal_speed < 0:
             self.horizontal_speed = 0
@@ -139,12 +139,27 @@ class Plane:
 
     # ================ force functions =============== #
     def calculate_drag(self) -> float:
-        """Calculating the drag on x axel; The opposite forse of thrust"""
-        base_drag_factor: float = 0.05
-        aoa_drag_factor: float = 0.02 # High AoA should create huge drag
+        """
+        Calculate simplified horizontal aerodynamic drag. (Calculating the drag on x axel; The opposite forse of thrust)
 
-        base_drag: float = self.horizontal_speed * base_drag_factor
-        aoa_drag: float = abs(self.aoa) * aoa_drag_factor * self.horizontal_speed
+        Drag increases with:
+        - the square of horizontal speed;
+        - the absolute angle of attack.
+        """
+        base_drag_factor: float = 0.003
+        aoa_drag_factor: float = 0.0004
+
+        speed_squared: float = self.horizontal_speed**2
+
+        base_drag: float = (
+            base_drag_factor * speed_squared
+        )
+
+        aoa_drag: float = (
+            aoa_drag_factor
+            * abs(self.aoa)
+            * speed_squared
+        )
 
         return base_drag + aoa_drag
 
