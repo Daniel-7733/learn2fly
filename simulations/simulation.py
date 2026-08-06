@@ -9,12 +9,16 @@ class Simulation:
     Manages simulated time and repeatedly updates the flight system.
     """
 
-    def __init__(self, flight_system: "FlightSystem", time_step: float) -> None:
+    def __init__(self, flight_system: "FlightSystem", time_step: float, max_simulation_time: float = 120.0,) -> None:
         if time_step <= 0:
             raise ValueError("time_step must be greater than zero.")
 
+        if max_simulation_time <= 0:
+            raise ValueError("max_simulation_time must be greater than zero.")
+
         self.flight_system = flight_system
         self.time_step = time_step
+        self.max_simulation_time = max_simulation_time
         self.time_elapsed: float = 0.0
         self.is_running: bool = False
 
@@ -23,7 +27,7 @@ class Simulation:
 
         self.is_running = True
 
-        while self.is_running:
+        while (self.is_running) and (self.time_elapsed < self.max_simulation_time):
             # Stop before performing another update when already grounded.
             if self.flight_system.plane.altitude <= 0:
                 self.stop()
@@ -37,7 +41,13 @@ class Simulation:
 
             self.display_status()
 
-        print("The plane has reached the ground.")
+        if self.flight_system.plane.altitude <= 0:
+            print("The plane has reached the ground.")
+        else:
+            print(
+                "Simulation finished after "
+                f"{self.time_elapsed:.1f} seconds."
+            )
 
     def stop(self) -> None:
         """Stops the simulation."""

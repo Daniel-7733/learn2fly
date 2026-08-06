@@ -17,9 +17,10 @@ class FlightAnalyzer:
     2. Urgency: How urgent is the danger?
     3. Recoverability: How many recovery options remain?
     """
-    def __init__(self, plane: "Plane", autopilot: "AutoPilot") -> None:
+    def __init__(self, plane: "Plane", autopilot: "AutoPilot", stall_prediction_min_aoa: float = 8.0) -> None:
         self.plane = plane
         self.autopilot = autopilot
+        self.stall_prediction_min_aoa = stall_prediction_min_aoa
 
 
     # ============ Analyzing the score ============== #
@@ -214,11 +215,16 @@ class FlightAnalyzer:
         speed_margin = self.plane.horizontal_speed - self.plane.min_safe_speed
         aoa_margin = self.plane.critical_aoa - self.plane.aoa
 
-        time_to_stall = FlightCalculator.time_to_stall(
-            self.plane.aoa,
-            self.plane.aoa_rate,
-            self.plane.critical_aoa,
-        )
+        if self.plane.aoa >= self.stall_prediction_min_aoa and self.plane.aoa_rate > 0.0:
+
+            time_to_stall = FlightCalculator.time_to_stall(
+                aoa=self.plane.aoa,
+                aoa_rate=self.plane.aoa_rate,
+                critical_aoa=self.plane.critical_aoa,
+            )
+
+        else:
+            time_to_stall = float("inf")
 
         time_to_impact = FlightCalculator.time_to_impact(
             self.plane.altitude,

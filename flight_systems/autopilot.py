@@ -17,7 +17,10 @@ class AutoPilot:
     It gives target values to FlightController.
     """
 
-    def __init__(self, target_speed: float = 100.0, speed_deadband: float = 5.0, target_altitude: float = 3000.0, altitude_deadband: float = 50.0, altitude_gain: float = 0.01, max_pitch_command: float = 5.0) -> None:
+    def __init__(self, target_speed: float = 100.0, speed_deadband: float = 5.0, target_altitude: float = 3000.0, 
+                 altitude_deadband: float = 50.0, altitude_gain: float = 0.01, max_pitch_command: float = 5.0,
+                 recovery_target_aoa: float = 4.0, minimum_recovery_pitch: float = -30.0, maximum_recovery_pitch: float = 10.0) -> None:
+
         # Speed-control configuration
         self.target_speed = target_speed
         self.speed_deadband = speed_deadband
@@ -30,6 +33,11 @@ class AutoPilot:
         # Safety limits
         self.max_pitch_command = max_pitch_command
         self.max_safe_aoa: float = 12.0
+        
+        # Safety recovery
+        self.recovery_target_aoa = recovery_target_aoa
+        self.minimum_recovery_pitch = minimum_recovery_pitch
+        self.maximum_recovery_pitch = maximum_recovery_pitch
 
     def update(self, plane: "Plane", decision: "Decision", controller: "FlightController") -> None:
         """
@@ -42,7 +50,17 @@ class AutoPilot:
 
         if decision.mode is FlightMode.EMERGENCY:
             if decision.reason is ThreatType.STALL:
-                controller.target_pitch = -5.0
+                recovery_pitch = (
+                    plane.flight_path_angle()
+                    + self.recovery_target_aoa
+                )
+
+                controller.target_pitch = FlightCalculator.clamp(
+                    recovery_pitch,
+                    self.minimum_recovery_pitch,
+                    self.maximum_recovery_pitch,
+                )
+
                 controller.target_throttle = 1.0
                 return
 
@@ -55,6 +73,16 @@ class AutoPilot:
                 controller.target_pitch = 5.0
                 controller.target_throttle = 1.0
                 return
+
+            # Emergency is still active during the confirmation period.
+            # Hold a gentle recovery configuration.
+            controller.target_pitch = FlightCalculator.clamp(
+                plane.flight_path_angle() + self.recovery_target_aoa,
+                self.minimum_recovery_pitch,
+                self.maximum_recovery_pitch,
+            )
+            controller.target_throttle = 0.7
+            return
 
         # ---------------------------------------------------------
         # 2. Temporary fallback protection

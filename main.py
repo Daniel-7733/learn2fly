@@ -66,7 +66,7 @@ def main() -> None:
     flight_controller = FlightController(
         target_pitch=plane.pitch_angle,
         target_throttle=plane.throttle,
-        max_pitch_rate=5.0,
+        max_pitch_rate=2.0,
         max_throttle_rate=0.2,
     )
 
@@ -101,6 +101,7 @@ def main() -> None:
     simulation = Simulation(
         flight_system=flight_system,
         time_step=TIME_STEP,
+        max_simulation_time=300.0,
     )
 
     simulation.run()
