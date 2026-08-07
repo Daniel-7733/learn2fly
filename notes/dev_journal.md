@@ -638,3 +638,1348 @@ Rate tells me where I am heading.
 Prediction tells me where I will be.
 
 
+
+## Day 6
+
+# Prediction — Looking Into the Future
+
+### Main Goal: Stop Reacting Too Late
+
+Until now, my aircraft system could understand the current state of the aircraft.
+
+I had things like:
+
+* Speed
+* Altitude
+* AoA
+* Energy
+* Energy Rate
+* Error
+* Rate of change
+
+But I realized something important:
+
+> Knowing what is happening now is sometimes already too late.
+
+For example, the aircraft may not be stalled yet, but if AoA is increasing very quickly, the stall can happen in a few seconds.
+
+So instead of only asking:
+
+> "Is the aircraft in danger?"
+
+I should also ask:
+
+> "How long until the aircraft becomes dangerous?"
+
+This introduced me to **prediction**.
+
+---
+
+### Time to Impact
+
+If the aircraft is descending, I can estimate how much time remains before reaching the ground.
+
+Conceptually:
+
+```text
+Time to Impact ≈ Altitude / Descent Rate
+```
+
+This gives much more information than altitude alone.
+
+For example:
+
+Plane A:
+
+* Altitude = 100 m
+* Vertical Speed = -1 m/s
+
+Plane B:
+
+* Altitude = 100 m
+* Vertical Speed = -50 m/s
+
+Both aircraft have exactly the same altitude.
+
+But they are clearly not in the same situation.
+
+Plane A has a lot of time.
+
+Plane B may hit the ground very soon.
+
+So:
+
+> State alone is not enough. Rate gives the state meaning.
+
+---
+
+### Time to Stall
+
+The same idea can be applied to Angle of Attack.
+
+If I know:
+
+* Current AoA
+* Critical AoA
+* AoA Rate
+
+Then I can estimate how long it will take before reaching the critical AoA.
+
+Conceptually:
+
+```text
+remaining_aoa = critical_aoa - current_aoa
+
+time_to_stall = remaining_aoa / aoa_rate
+```
+
+This creates a very important change in thinking.
+
+Instead of:
+
+```text
+STALL!
+```
+
+I can know:
+
+```text
+STALL MAY OCCUR IN 2.1 SECONDS
+```
+
+That gives the control system time to react.
+
+---
+
+### My New Mental Model
+
+The system now has three levels of understanding:
+
+```text
+State       -> Where am I?
+Rate        -> Where am I heading?
+Prediction  -> Where will I probably be?
+```
+
+This feels like an important step toward making the aircraft less reactive and more intelligent.
+
+---
+
+## Day 7
+
+# FlightAnalyzer — Turning Numbers Into Meaning
+
+### Main Goal: Separate Physics From Understanding
+
+I started realizing that the Plane should not be responsible for understanding whether something is dangerous.
+
+The Plane should describe the aircraft.
+
+For example:
+
+```text
+speed = 48 m/s
+aoa = 13 degrees
+altitude = 300 m
+```
+
+These are facts.
+
+But something else should interpret those facts.
+
+For example:
+
+```text
+Speed margin is low.
+AoA is approaching stall.
+Impact may happen in 8 seconds.
+Risk is HIGH.
+```
+
+This became the responsibility of the **FlightAnalyzer**.
+
+---
+
+### Margins
+
+Instead of only looking at values, I started calculating how far the aircraft is from a limit.
+
+For speed:
+
+```text
+speed_margin = current_speed - minimum_safe_speed
+```
+
+For AoA:
+
+```text
+aoa_margin = critical_aoa - current_aoa
+```
+
+This is much more useful.
+
+For example:
+
+```text
+Speed = 52 m/s
+Minimum Safe Speed = 50 m/s
+```
+
+The number 52 by itself does not say much.
+
+But:
+
+```text
+Speed Margin = +2 m/s
+```
+
+immediately tells me that the aircraft is close to the boundary.
+
+---
+
+### Risk Levels
+
+I introduced risk levels:
+
+```text
+LOW
+MODERATE
+HIGH
+CRITICAL
+```
+
+The analyzer can use things like:
+
+* Time to stall
+* Time to impact
+* Speed margin
+* AoA margin
+
+to determine how urgent the situation is.
+
+Example idea:
+
+```text
+< 2 seconds   -> CRITICAL
+< 5 seconds   -> HIGH
+< 15 seconds  -> MODERATE
+otherwise     -> LOW
+```
+
+The exact numbers can change later.
+
+The important lesson is the architecture:
+
+> Physics produces data. Analysis gives the data meaning.
+
+---
+
+## Day 8
+
+# Threats, Urgency and Recoverability
+
+### Main Goal: Not Every Danger Is Equal
+
+An aircraft can have multiple problems at the same time.
+
+For example:
+
+```text
+Low speed
+High AoA
+Low altitude
+Energy decreasing
+```
+
+The autopilot cannot treat everything equally.
+
+It needs to know:
+
+> Which problem should I solve first?
+
+So I started thinking about **threat priority**.
+
+Some threat types are:
+
+```text
+STALL
+IMPACT
+OVERSPEED
+NONE
+```
+
+---
+
+### Most Urgent Threat
+
+If:
+
+```text
+Time to Stall = 2 seconds
+Time to Impact = 15 seconds
+```
+
+then both are problems.
+
+But stall is the immediate threat.
+
+So:
+
+```text
+Most Urgent Threat = STALL
+```
+
+This taught me something important:
+
+> A good system does not only detect problems. It prioritizes them.
+
+---
+
+### Recoverability
+
+Then another question appeared.
+
+Knowing that something is dangerous is useful.
+
+But:
+
+> Can the aircraft still recover?
+
+So I introduced the idea of recoverability:
+
+```text
+EXCELLENT
+GOOD
+POOR
+IMPOSSIBLE
+```
+
+This adds another layer of understanding.
+
+The aircraft can now think conceptually like:
+
+```text
+Threat: STALL
+Risk: CRITICAL
+Time Remaining: 1.8 seconds
+Recoverability: POOR
+```
+
+This is much more meaningful than just:
+
+```text
+AoA = 16 degrees
+```
+
+---
+
+## Day 9
+
+# FlightReport — Creating One Source of Information
+
+### Main Goal: Stop Passing Random Numbers Everywhere
+
+As the project grew, I started having many pieces of information:
+
+* Speed
+* Altitude
+* AoA
+* Margins
+* Risk
+* Threat
+* Time to stall
+* Time to impact
+* Recoverability
+
+Passing every variable separately between systems would make the architecture messy.
+
+So I introduced a **FlightReport**.
+
+The report is like a structured package containing the important information about the aircraft.
+
+Conceptually:
+
+```text
+Plane
+  |
+  v
+FlightAnalyzer
+  |
+  v
+FlightReport
+```
+
+Then other systems can read the report.
+
+For example:
+
+```text
+FlightReport
+  |
+  v
+DecisionMaker
+```
+
+---
+
+### Data Pyramid
+
+This also made me think about something bigger:
+
+```text
+DATA
+  ↓
+INFORMATION
+  ↓
+KNOWLEDGE
+  ↓
+DECISION
+```
+
+Example:
+
+```text
+AoA = 14°                       -> Data
+AoA Margin = 1°                 -> Information
+Stall likely in 2 seconds       -> Knowledge
+Lower pitch and increase power  -> Decision
+```
+
+One important lesson for me was:
+
+> More data does not automatically create more intelligence.
+
+Sometimes too much information can actually make a system harder to understand.
+
+The important thing is choosing the signals that matter.
+
+---
+
+## Day 10
+
+# Decision and DecisionMaker
+
+### Main Goal: Separate Understanding From Choosing
+
+Now the aircraft could analyze its situation.
+
+But analysis and decision are not the same thing.
+
+The FlightAnalyzer answers:
+
+> "What is happening?"
+
+The DecisionMaker answers:
+
+> "What should we do about it?"
+
+So I separated these responsibilities.
+
+---
+
+### Decision
+
+A Decision is the result.
+
+It can contain information like:
+
+```text
+Mode: EMERGENCY
+Priority: CRITICAL
+Reason: STALL
+Message: Stall recovery required
+```
+
+The Decision does not decide anything by itself.
+
+It is just the result of the decision process.
+
+---
+
+### DecisionMaker
+
+The DecisionMaker contains the logic.
+
+Conceptually:
+
+```text
+FlightReport
+     |
+     v
+DecisionMaker
+     |
+     v
+Decision
+```
+
+This separation became very important to me.
+
+```text
+FlightAnalyzer -> Understand
+DecisionMaker  -> Decide
+Decision       -> Describe the decision
+AutoPilot      -> Turn the decision into commands
+Controller     -> Move controls toward commands
+Plane          -> Respond physically
+```
+
+Every class should have one clear responsibility.
+
+---
+
+## Day 11
+
+# Flight Modes — The Same Aircraft Has Different Goals
+
+### Main Goal: Context Changes the Correct Decision
+
+I learned that there is no single "correct" aircraft behavior.
+
+For example:
+
+During TAKEOFF:
+
+```text
+Climbing is expected.
+High thrust is expected.
+```
+
+During CRUISE:
+
+```text
+Stable altitude may be more important.
+Efficiency becomes important.
+```
+
+During LANDING:
+
+```text
+Descending is expected.
+Lower altitude is normal.
+```
+
+Therefore, the same sensor value can mean different things depending on the aircraft's current mode.
+
+I introduced flight modes:
+
+```text
+TAKEOFF
+CLIMB
+CRUISE
+DESCENT
+LANDING
+EMERGENCY
+```
+
+---
+
+### TAKEOFF
+
+The main objective is getting the aircraft safely into the air.
+
+Important things include:
+
+* Speed
+* Thrust
+* AoA
+* Positive climb
+* Safe altitude
+
+---
+
+### CLIMB
+
+The main objective is gaining altitude.
+
+But climbing is an energy exchange.
+
+```text
+Kinetic Energy -> Potential Energy
+```
+
+If I pitch upward too aggressively, I may gain altitude while losing too much speed.
+
+So climbing is not simply:
+
+> Nose up.
+
+It is:
+
+> Manage the exchange between speed, altitude, thrust and energy.
+
+---
+
+### Context Matters
+
+This was an important lesson:
+
+> A number cannot always be judged without knowing the mission state.
+
+Descending at -5 m/s might be dangerous during cruise.
+
+The exact same -5 m/s might be completely normal during landing.
+
+---
+
+## Day 12
+
+# AutoPilot vs FlightController
+
+### Main Goal: Separate Strategy From Movement
+
+At one point, I realized I was mixing two different responsibilities.
+
+The **AutoPilot** should determine what the aircraft should try to do.
+
+The **FlightController** should determine how quickly the controls move toward that command.
+
+Example:
+
+```text
+AutoPilot:
+"Target pitch should be -5 degrees."
+
+FlightController:
+"Move the current pitch toward -5 degrees at the allowed rate."
+```
+
+This distinction is very important.
+
+---
+
+### AutoPilot
+
+The AutoPilot can set targets such as:
+
+```text
+target_pitch
+target_throttle
+target_bank_angle
+target_vertical_speed
+```
+
+It thinks at a higher level.
+
+---
+
+### FlightController
+
+The controller physically approaches those targets while respecting limits such as:
+
+```text
+max_pitch_rate
+max_throttle_rate
+```
+
+For example:
+
+The target throttle may instantly change from:
+
+```text
+0.3 -> 1.0
+```
+
+But the real throttle should not magically teleport there.
+
+The controller changes it over time.
+
+---
+
+### Another Architecture Lesson
+
+I learned another useful rule:
+
+> Commanding a value and physically reaching that value are two different responsibilities.
+
+This pattern is not only useful for aircraft.
+
+It can be used in:
+
+* Robots
+* Cars
+* Drones
+* Games
+* Industrial machines
+
+---
+
+## Day 13
+
+# Emergency Protection
+
+### Main Goal: Survival Rules Must Override Normal Goals
+
+Normal flight objectives become unimportant when the aircraft is in immediate danger.
+
+For example:
+
+During normal flight I may want:
+
+```text
+Target altitude = 3000 m
+```
+
+But if the aircraft is about to stall, maintaining altitude should not remain the priority.
+
+The aircraft needs to survive first.
+
+For a stall, the system may command:
+
+```text
+Pitch Down
+Throttle Up
+```
+
+For impact danger:
+
+```text
+Pitch Up
+Throttle Up
+```
+
+depending on the aircraft state and available energy.
+
+---
+
+### Protection Layers
+
+I started thinking about the autopilot as layers:
+
+```text
+Emergency Protection
+        ↓
+Safety Protection
+        ↓
+Mission Objective
+```
+
+For example:
+
+```text
+STALL?
+    YES -> Recover
+
+LOW SPEED?
+    YES -> Protect speed
+
+HIGH AoA?
+    YES -> Reduce AoA
+
+Otherwise
+    -> Continue normal altitude/mission control
+```
+
+This is similar to instinct.
+
+The aircraft should not spend too much time thinking about its mission when survival is immediately threatened.
+
+---
+
+## Day 14
+
+# Architecture — Who Owns What?
+
+### Main Goal: Stop Thinking Only About Functions
+
+The project started becoming large enough that writing correct functions was no longer the only problem.
+
+I needed to understand:
+
+> Who should own each responsibility?
+
+This changed the way I think about programming.
+
+Instead of immediately asking:
+
+> "How do I code this?"
+
+I started asking:
+
+```text
+What is this responsibility?
+Who should own it?
+Which layer does it belong to?
+Who is allowed to change it?
+```
+
+---
+
+### My Architecture
+
+The major responsibilities started becoming clearer.
+
+```text
+Plane
+    Owns aircraft physical state.
+
+FlightCalculator
+    Owns reusable calculations.
+
+FlightAnalyzer
+    Interprets aircraft condition.
+
+FlightReport
+    Carries analyzed information.
+
+DecisionMaker
+    Chooses what should happen.
+
+Decision
+    Describes that choice.
+
+AutoPilot
+    Converts decisions into control targets.
+
+FlightController
+    Moves controls toward targets.
+```
+
+This was one of the biggest changes in my programming thinking.
+
+I am no longer only learning how to write code.
+
+I am learning how to **design systems**.
+
+---
+
+## Day 15
+
+# Simulation and FlightSystem
+
+### Main Goal: Separate the World From the Aircraft
+
+As the architecture grew, another important boundary appeared.
+
+I had two different responsibilities:
+
+1. Managing simulated time.
+2. Managing the aircraft systems.
+
+These should not belong to the same class.
+
+So I created:
+
+```text
+Simulation
+```
+
+and:
+
+```text
+FlightSystem
+```
+
+---
+
+### Simulation
+
+Simulation owns:
+
+* Simulation time
+* Time step (`dt`)
+* Main simulation loop
+* Starting and stopping the simulation
+
+Its job is essentially:
+
+```text
+while simulation_is_running:
+    flight_system.update(dt)
+    time_elapsed += dt
+```
+
+---
+
+### FlightSystem
+
+FlightSystem coordinates the aircraft components.
+
+Conceptually:
+
+```text
+Simulation
+    |
+    v
+FlightSystem
+    |
+    +--> Plane
+    +--> Analyzer
+    +--> DecisionMaker
+    +--> AutoPilot
+    +--> Controller
+```
+
+The important sentence I learned is:
+
+> Simulation manages the world and time. FlightSystem manages the aircraft.
+
+---
+
+### dt vs time_elapsed
+
+I also understood why both are necessary.
+
+`time_elapsed` answers:
+
+> How long has the simulation been running?
+
+`dt` answers:
+
+> How much time should physics advance during this update?
+
+For example:
+
+```text
+time_elapsed = 20 seconds
+dt = 0.1 seconds
+```
+
+means:
+
+The simulation has existed for 20 seconds, but this update represents only the next 0.1 seconds.
+
+This is fundamental to simulations.
+
+---
+
+## Day 16
+
+# Building a Pipeline Instead of a Collection of Classes
+
+### Main Goal: Understand How the Whole System Moves
+
+After creating many classes, I realized that knowing each class separately is not enough.
+
+I need to understand the **flow of information** through the entire program.
+
+My current mental model became:
+
+```text
+             SIMULATION
+                 |
+                 | dt
+                 v
+            FLIGHT SYSTEM
+                 |
+                 v
+               PLANE
+                 |
+                 | aircraft state
+                 v
+          FLIGHT ANALYZER
+                 |
+                 | analysis
+                 v
+           FLIGHT REPORT
+                 |
+                 v
+          DECISION MAKER
+                 |
+                 v
+             DECISION
+                 |
+                 v
+             AUTOPILOT
+                 |
+                 | targets
+                 v
+        FLIGHT CONTROLLER
+                 |
+                 | control changes
+                 v
+               PLANE
+                 |
+                 v
+              PHYSICS
+                 |
+                 +--------------------+
+                                      |
+                                      v
+                                NEXT UPDATE
+```
+
+Now I can look at the project as a system rather than disconnected Python files.
+
+This also helps debugging.
+
+If something is wrong, I can ask:
+
+```text
+Is the physics wrong?
+Is the analysis wrong?
+Is the decision wrong?
+Is the command wrong?
+Is the controller wrong?
+```
+
+Architecture helps me locate the problem.
+
+---
+
+## Day 17
+
+# Modules and Project Structure
+
+### Main Goal: Make the Code Structure Explain the Architecture
+
+As Learn2Fly became bigger, putting everything in one directory stopped making sense.
+
+I started organizing related responsibilities into modules.
+
+For example:
+
+```text
+flight_systems/
+    decisions/
+        decision.py
+        decision_maker.py
+```
+
+Later, as the decision system grew:
+
+```text
+flight_systems/
+    decisions/
+        __init__.py
+        decision.py
+        decision_maker.py
+        states/
+            __init__.py
+            flight_state.py
+            cruise_state.py
+            emergency_state.py
+```
+
+This taught me that folders are not only for making a project look clean.
+
+They communicate architecture.
+
+A good project structure should help answer:
+
+> Where does this responsibility belong?
+
+---
+
+### Imports Changed Too
+
+Moving code into modules also taught me more about Python imports.
+
+Something that was previously imported directly may now need to be imported through its package.
+
+This made `__init__.py` more meaningful to me.
+
+I started seeing packages as interfaces instead of only folders.
+
+---
+
+## Day 18
+
+# State Machines — Behavior as States
+
+### Main Goal: Stop Building One Giant Decision Function
+
+As flight modes grew, I could see a future problem.
+
+If every behavior goes inside one DecisionMaker, eventually I may have something like:
+
+```text
+if TAKEOFF:
+    ...
+
+elif CLIMB:
+    ...
+
+elif CRUISE:
+    ...
+
+elif DESCENT:
+    ...
+
+elif LANDING:
+    ...
+
+elif EMERGENCY:
+    ...
+```
+
+And inside each one there could be many more conditions.
+
+This can become difficult to understand and maintain.
+
+So I started learning about **State Machines**.
+
+---
+
+### FlightState
+
+Instead of making one giant object understand every flight mode, each state can own its own behavior.
+
+Conceptually:
+
+```text
+FlightState
+     |
+     +--> TakeoffState
+     +--> ClimbState
+     +--> CruiseState
+     +--> DescentState
+     +--> LandingState
+     +--> EmergencyState
+```
+
+`FlightState` defines the common idea of a flight state.
+
+The specific states define their own behavior.
+
+For example:
+
+```text
+CruiseState
+```
+
+should understand cruise behavior.
+
+```text
+EmergencyState
+```
+
+should understand emergency behavior.
+
+---
+
+### Why This Matters
+
+Without states:
+
+```text
+DecisionMaker
+    knows everything
+    does everything
+    becomes huge
+```
+
+With states:
+
+```text
+DecisionMaker
+    |
+    v
+Current FlightState
+    |
+    v
+State-specific logic
+```
+
+The responsibility is distributed to the correct place.
+
+---
+
+### State Transitions
+
+A state machine also introduces another important concept:
+
+**Transition.**
+
+The aircraft does not randomly change modes.
+
+Something must cause the transition.
+
+For example:
+
+```text
+TAKEOFF
+   |
+   | safe altitude reached
+   v
+CLIMB
+   |
+   | target altitude reached
+   v
+CRUISE
+```
+
+And emergency can interrupt normal operation:
+
+```text
+CRUISE --------+
+               |
+CLIMB ---------+----> EMERGENCY
+               |
+DESCENT -------+
+```
+
+This is beginning to make the aircraft behavior much easier to reason about.
+
+---
+
+## Day 19
+
+# The Bigger Lesson — From Coding to Systems Thinking
+
+When I started Learn2Fly, the goal was very simple:
+
+```text
+Make a plane fall.
+```
+
+At that point I was thinking mostly about equations and Python.
+
+Now the project contains ideas such as:
+
+```text
+Physics
+    ↓
+State
+    ↓
+Rate
+    ↓
+Prediction
+    ↓
+Analysis
+    ↓
+Risk
+    ↓
+Decision
+    ↓
+State Machine
+    ↓
+Control
+    ↓
+Physics
+```
+
+But the biggest thing I learned is not one formula or Python feature.
+
+It is how to think about a system.
+
+---
+
+### Questions I Ask Now
+
+When I create something new, I try to ask:
+
+1. What is its responsibility?
+2. Which layer does it belong to?
+3. Who should own this information?
+4. Who is allowed to change it?
+5. What information does it need?
+6. What information should it produce?
+
+This prevents me from putting everything everywhere.
+
+---
+
+### Big Picture and Small Picture
+
+I also learned that I need both.
+
+The big picture tells me:
+
+```text
+Where does this piece belong?
+Why does it exist?
+How does it communicate with everything else?
+```
+
+The small picture tells me:
+
+```text
+Is this equation correct?
+Is this function correct?
+Is this type correct?
+Is this update happening correctly?
+```
+
+Only looking at the small picture can create good code inside a bad architecture.
+
+Only looking at the big picture can create a beautiful architecture that does not actually work.
+
+I need both.
+
+---
+
+### Where Learn2Fly Is Now
+
+The project started here:
+
+```text
+Gravity
+   ↓
+Plane falls
+```
+
+Now I can see a much larger system:
+
+```text
+                 MISSION
+                    |
+                    v
+              FLIGHT STATE
+                    |
+                    v
+                DECISION
+                    |
+                    v
+                AUTOPILOT
+                    |
+                    v
+               CONTROLLER
+                    |
+                    v
+                  PLANE
+                    |
+                    v
+                 PHYSICS
+                    |
+                    v
+                SENSORS
+                    |
+                    v
+                ANALYSIS
+                    |
+                    v
+               PREDICTION
+                    |
+                    +-------------> DECISION
+```
+
+There is still a lot missing.
+
+But that is actually the point.
+
+Learn2Fly is no longer only teaching me how aircraft work.
+
+It is teaching me how complex systems are built:
+
+> Start simple.
+> Give every part a responsibility.
+> Build clear boundaries.
+> Connect the parts carefully.
+> Observe the system.
+> Improve one layer at a time.
+
+And most importantly:
+
+> Do not rush to hardware.
+
+First:
+
+```text
+Simulate
+    ↓
+Stabilize
+    ↓
+Log
+    ↓
+Analyze
+    ↓
+C / C++
+    ↓
+Learning
+    ↓
+Hardware
+```
+
+The plane started by falling because of gravity.
+
+Now I am beginning to understand how to build the system that can decide how not to fall.
