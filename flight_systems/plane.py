@@ -33,22 +33,30 @@ class Plane:
         self.energy_rate = 0.0
 
     def update_physics(self, gravity: float, dt: float) -> None:
-        # Save the AoA from the previous physics step.
+        if dt <= 0.0:
+            raise ValueError("dt must be greater than zero.")
+
+        # Save AoA from the previous completed physics step.
         self.previous_aoa = self.aoa
 
-        # Update horizontal motion and forces.
-        self.calculate_horizontal_speed(dt)
-
-        # Calculate the AoA used for the force calculations.
+        # Refresh AoA before calculating forces that depend on it.
         self.aoa = self.calculate_aoa()
 
-        lift_force = self.calculate_lift()
-        vertical_drag = self.calculate_vertical_drag()
+        # Update horizontal motion using the current AoA for drag.
+        self.calculate_horizontal_speed(dt)
 
-        lift_acceleration = (lift_force + vertical_drag) / self.mass
-        net_acceleration = gravity + lift_acceleration
+        # Horizontal speed changed, so refresh AoA before calculating lift.
+        self.aoa = self.calculate_aoa()
 
-        # Update vertical motion.
+        lift_force: float = self.calculate_lift()
+        vertical_drag: float = self.calculate_vertical_drag()
+
+        lift_acceleration: float = (
+            lift_force + vertical_drag
+        ) / self.mass
+
+        net_acceleration: float = gravity + lift_acceleration
+
         self.vertical_speed = self.calculate_next_vertical_speed(
             net_acceleration,
             dt,
@@ -59,14 +67,10 @@ class Plane:
         if self.altitude < 0.0:
             self.altitude = 0.0
 
-        # Refresh AoA after the aircraft state has changed.
+        # Calculate the final AoA of this completed physics step.
         self.aoa = self.calculate_aoa()
 
-        if dt > 0.0:
-            self.aoa_rate = (self.aoa - self.previous_aoa) / dt
-        else:
-            self.aoa_rate = 0.0
-
+        self.aoa_rate = (self.aoa - self.previous_aoa) / dt
 
     # ================ Speed functions =============== #
     def calculate_vertical_speed(self) -> float: # I won't use this one becsaue I use physic formula to solve the problem
