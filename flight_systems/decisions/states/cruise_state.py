@@ -11,9 +11,15 @@ if TYPE_CHECKING:
 
 class CruiseState(FlightState):
 
+    def _should_enter_emergency(self, report: FlightReport) -> bool:
+        """ The simple version is 'return report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}'"""
+        if report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}:
+            return True
+        return False
+
     def handle(self, decision_maker: "DecisionMaker", report: FlightReport) -> Decision:
 
-        if report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}:
+        if self._should_enter_emergency(report):
             from flight_systems.decisions.states.emergency_state import (
                 EmergencyState,
             )
@@ -24,7 +30,8 @@ class CruiseState(FlightState):
                 mode=FlightMode.EMERGENCY,
                 priority=report.risk,
                 reason=report.most_urgent_threat,
-                message="Entering emergency mode.",
+                message=(f"Transitioning from Cruise to Emergency "
+                         f"because of {report.most_urgent_threat.value}."),
                 confidence=1.0
             )
 
