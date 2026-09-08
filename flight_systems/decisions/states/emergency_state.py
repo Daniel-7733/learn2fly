@@ -19,6 +19,9 @@ class EmergencyState(FlightState):
         self.safe_updates_required = safe_updates_required
         self.safe_update_count: int = 0
 
+    def _recovery_confirmed(self) -> bool:
+        return self.safe_update_count >= self.safe_updates_required
+
     def handle(self, decision_maker: "DecisionMaker", report: FlightReport) -> Decision:
 
         if report.risk is RiskLevel.LOW:
@@ -27,7 +30,7 @@ class EmergencyState(FlightState):
             # Recovery was interrupted.
             self.safe_update_count = 0
 
-        if self.safe_update_count >= self.safe_updates_required:
+        if self._recovery_confirmed():
             from flight_systems.decisions.states.cruise_state import (
                 CruiseState,
             )

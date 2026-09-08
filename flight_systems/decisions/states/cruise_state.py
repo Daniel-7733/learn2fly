@@ -12,11 +12,8 @@ if TYPE_CHECKING:
 class CruiseState(FlightState):
 
     def _should_enter_emergency(self, report: FlightReport) -> bool:
-        """ The simple version is 'return report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}'"""
-        if report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}:
-            return True
-        return False
-
+        return report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}
+    
     def handle(self, decision_maker: "DecisionMaker", report: FlightReport) -> Decision:
 
         if self._should_enter_emergency(report):
