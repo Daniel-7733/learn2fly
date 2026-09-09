@@ -156,9 +156,93 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
     assert isinstance(decision_maker.current_state, EmergencyState)
     assert emergency_decision.mode is FlightMode.EMERGENCY
 
-    # Safe flight changes EmergencyState back into CruiseState.
-    cruise_decision = decision_maker.make_decision(safe_report)
+
+# First safe update: remain in EmergencyState.
+    first_safe_decision = decision_maker.make_decision(safe_report)
+
+    assert isinstance(decision_maker.current_state, EmergencyState)
+    assert first_safe_decision.mode is FlightMode.EMERGENCY
+
+
+# Second safe update: still remain in EmergencyState.
+    second_safe_decision = decision_maker.make_decision(safe_report)
+
+    assert isinstance(decision_maker.current_state, EmergencyState)
+    assert second_safe_decision.mode is FlightMode.EMERGENCY
+
+
+# Third consecutive safe update: recovery is confirmed.
+    third_safe_decision = decision_maker.make_decision(safe_report)
 
     assert isinstance(decision_maker.current_state, CruiseState)
-    assert cruise_decision.mode is FlightMode.CRUISE
+    assert third_safe_decision.mode is FlightMode.CRUISE
 
+def test_emergency_requires_consecutive_safe_updates() -> None:
+    decision_maker = DecisionMaker()
+
+    critical_report = FlightReport(
+        speed_margin=10.0,
+        aoa_margin=3.0,
+        altitude=5000.0,
+        time_to_stall=1.5,
+        time_to_impact=30.0,
+        most_urgent_threat=ThreatType.STALL,
+        risk=RiskLevel.CRITICAL,
+        recoverability=Recoverability.POOR,
+        energy_state=EnergyState.LOW,
+    )
+
+    safe_report = FlightReport(
+        speed_margin=50.0,
+        aoa_margin=10.0,
+        altitude=3000.0,
+        time_to_stall=99.0,
+        time_to_impact=99.0,
+        most_urgent_threat=ThreatType.NONE,
+        risk=RiskLevel.LOW,
+        recoverability=Recoverability.EXCELLENT,
+        energy_state=EnergyState.HIGH,
+    )
+
+    moderate_report = FlightReport(
+        speed_margin=30.0,
+        aoa_margin=8.0,
+        altitude=3000.0,
+        time_to_stall=20.0,
+        time_to_impact=99.0,
+        most_urgent_threat=ThreatType.NONE,
+        risk=RiskLevel.MODERATE,
+        recoverability=Recoverability.GOOD,
+        energy_state=EnergyState.MODERATE,
+    )
+
+    # Enter EmergencyState.
+    decision_maker.make_decision(critical_report)
+
+    assert isinstance(decision_maker.current_state, EmergencyState)
+
+    # LOW #1
+    decision = decision_maker.make_decision(safe_report)
+    assert decision.mode is FlightMode.EMERGENCY
+
+    # LOW #2
+    decision = decision_maker.make_decision(safe_report)
+    assert decision.mode is FlightMode.EMERGENCY
+
+    # MODERATE interrupts recovery and resets the counter.
+    decision = decision_maker.make_decision(moderate_report)
+    assert decision.mode is FlightMode.EMERGENCY
+
+    # LOW #1 again
+    decision = decision_maker.make_decision(safe_report)
+    assert decision.mode is FlightMode.EMERGENCY
+
+    # LOW #2
+    decision = decision_maker.make_decision(safe_report)
+    assert decision.mode is FlightMode.EMERGENCY
+
+    # LOW #3 → recovery confirmed.
+    decision = decision_maker.make_decision(safe_report)
+
+    assert decision.mode is FlightMode.CRUISE
+    assert isinstance(decision_maker.current_state, CruiseState)
