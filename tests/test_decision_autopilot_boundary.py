@@ -12,17 +12,25 @@ from flight_systems.enums import (
     ThreatType,
 )
 from flight_systems.flight_report import FlightReport
+from flight_systems.missions.mission import Mission
+
 
 # ============================================
-#     Initializing some fake classes
+# Initializing some fake classes
 # ============================================
+
 
 @dataclass
 class FakePlane:
     """
-    Provides only the Plane attributes AutoPilot needs.
+    Provides only the Plane attributes and methods AutoPilot needs.
 
     Physics is intentionally excluded from this test.
+
+    This fake exists because this test is checking the boundary between:
+        DecisionMaker -> Decision -> AutoPilot -> Controller
+
+    We do not need the full Plane physics engine here.
     """
 
     horizontal_speed: float
@@ -30,11 +38,24 @@ class FakePlane:
     aoa: float
     altitude: float
 
+    # Used by AutoPilot during stall recovery.
+    # The real Plane calculates this from its motion.
+    # Here we provide a fixed value so the test stays deterministic.
+    flight_path_angle_value: float = 0.0
+
+    def flight_path_angle(self) -> float:
+        """Return the fake flight-path angle used by AutoPilot."""
+        return self.flight_path_angle_value
+
 
 @dataclass
 class FakeController:
     """
     Receives the targets selected by AutoPilot.
+
+    We only need the outputs that this boundary test cares about:
+        - target_pitch
+        - target_throttle
     """
 
     target_pitch: float = 0.0
@@ -42,8 +63,9 @@ class FakeController:
 
 
 # ============================================
-#           Test the functions
+# Test the emergency decision -> AutoPilot path
 # ============================================
+
 
 @pytest.mark.parametrize(
     (
@@ -56,7 +78,19 @@ class FakeController:
     [
         # Critical stall:
         # DecisionMaker chooses EMERGENCY.
-        # AutoPilot commands nose-down and full throttle.
+        #
+        # AutoPilot calculates stall-recovery pitch from:
+        #
+        #     flight_path_angle + recovery_target_aoa
+        #
+        # Fake flight path angle = -10 degrees
+        # Default recovery target AoA = 4 degrees
+        #
+        # Therefore:
+        #
+        #     -10 + 4 = -6 degrees
+        #
+        # AutoPilot also commands full throttle.
         (
             FlightReport(
                 speed_margin=20.0,
@@ -71,7 +105,7 @@ class FakeController:
             ),
             FlightMode.EMERGENCY,
             ThreatType.STALL,
-            -5.0,
+            -6.0,
             1.0,
         ),
 
@@ -104,44 +138,70 @@ def test_emergency_decision_produces_correct_control_targets(
     expected_pitch: float,
     expected_throttle: float,
 ) -> None:
+    # ============================================
     # Arrange
-    decision_maker = DecisionMaker()
+    # ============================================
+
+    # DecisionMaker now requires a Mission.
+    mission = Mission(target_altitude=3000.0)
+
+    decision_maker = DecisionMaker(mission)
+
     autopilot = AutoPilot()
 
+    # The fake plane gives AutoPilot only the information
+    # required for this boundary test.
     plane = FakePlane(
         horizontal_speed=100.0,
         min_safe_speed=50.0,
         aoa=5.0,
         altitude=3000.0,
+        flight_path_angle_value=-10.0,
     )
 
     controller = FakeController()
 
-    # Act: FlightReport -> DecisionMaker -> Decision
+    # ============================================
+    # Act
+    # ============================================
+
+    # FlightReport -> DecisionMaker -> Decision
     decision = decision_maker.make_decision(report)
 
-    # Act: Decision -> AutoPilot -> Controller targets
+    # Decision -> AutoPilot -> Controller targets
     autopilot.update(
         plane,
         decision,
         controller,
     )
 
-    # Assert the DecisionMaker output
+    # ============================================
+    # Assert
+    # ============================================
+
+    # Assert the DecisionMaker output.
     assert decision.mode is expected_mode
     assert decision.reason is expected_reason
     assert decision.priority is RiskLevel.CRITICAL
 
-    # Assert the AutoPilot translation
+    # Assert the AutoPilot translation.
     assert controller.target_pitch == pytest.approx(expected_pitch)
+
     assert controller.target_throttle == pytest.approx(
         expected_throttle
     )
 
 
+# ============================================
+# Test normal cruise altitude control
+# ============================================
+
 
 def test_cruise_decision_uses_normal_altitude_control() -> None:
+    # ============================================
     # Arrange
+    # ============================================
+
     report = FlightReport(
         speed_margin=50.0,
         aoa_margin=10.0,
@@ -154,7 +214,9 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
         energy_state=EnergyState.HIGH,
     )
 
-    decision_maker = DecisionMaker()
+    mission = Mission(target_altitude=3000.0)
+
+    decision_maker = DecisionMaker(mission)
 
     autopilot = AutoPilot(
         target_altitude=3000.0,
@@ -166,27 +228,53 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
         horizontal_speed=100.0,
         min_safe_speed=50.0,
         aoa=5.0,
+
+        # Important:
+        # AutoPilot receives the current aircraft altitude from Plane.
+        # For this test we want the aircraft to be below the target altitude.
         altitude=2000.0,
+
+        # Not important for normal cruise altitude control,
+        # but FakePlane supports it because emergency stall recovery needs it.
+        flight_path_angle_value=-10.0,
     )
 
     controller = FakeController()
 
+    # ============================================
     # Act
+    # ============================================
+
+    # FlightReport -> DecisionMaker -> Decision
     decision = decision_maker.make_decision(report)
 
+    # Decision -> AutoPilot -> Controller targets
     autopilot.update(
         plane,
         decision,
         controller,
     )
 
-    # Assert the selected strategy
+    # ============================================
+    # Assert
+    # ============================================
+
+    # Assert the selected strategy.
     assert decision.mode is FlightMode.CRUISE
     assert decision.reason is ThreatType.NONE
 
     # altitude_error = 3000 - 2000 = 1000
+    #
     # raw command = 1000 * 0.01 = 10
+    #
+    # max_pitch_command = 5
+    #
+    # therefore:
     # clamped command = 5
     assert controller.target_pitch == pytest.approx(5.0)
+
+    # Aircraft is below target altitude,
+    # so AutoPilot uses the climb/cruise throttle command.
     assert controller.target_throttle == pytest.approx(0.7)
+
 

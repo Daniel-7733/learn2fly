@@ -23,28 +23,75 @@ Just a model to see how does we work
                        CLIMB       TAKEOFF
 """
 class TakeoffState(FlightState):
-    """Handle decisions and transitions while the aircraft is taking off."""
+    """
+    Handle decisions and transitions while the aircraft is taking off.
 
-    def __init__(self, safe_altitude: float = ...) -> None:
+    Responsibility:
+        - Remain in TAKEOFF until a safe altitude is reached.
+        - Transition to EMERGENCY if safety becomes unacceptable.
+        - Transition to CLIMB after successful takeoff.
+    """
+
+    def __init__(self, safe_altitude: float = 300.0) -> None:
+        """
+        safe_altitude:
+            Minimum altitude required before takeoff is considered complete.
+        """
         self.safe_altitude = safe_altitude
 
     def handle(self, decision_maker: "DecisionMaker", report: FlightReport) -> Decision:
 
-        # 1. Check whether safety requires EmergencyState.
+        # ---------------------------------------------------------
+        # Safety always has the highest priority.
+        # ---------------------------------------------------------
+        if self._should_enter_emergency(report):
+            from flight_systems.decisions.states.emergency_state import (
+                EmergencyState,
+            )
 
-        # 2. Check whether takeoff is complete.
+            decision_maker.change_state(EmergencyState())
 
-        # 3. If complete, transition to ClimbState.
+            return Decision(
+                mode=FlightMode.EMERGENCY,
+                priority=report.risk,
+                reason=report.most_urgent_threat,
+                message="Unsafe takeoff. Entering emergency mode.",
+                confidence=1.0,
+            )
 
-        # 4. Otherwise remain in TakeoffState.
+        # ---------------------------------------------------------
+        # Takeoff completed successfully.
+        # ---------------------------------------------------------
+        if self._takeoff_complete(report):
+            from flight_systems.decisions.states.climb_state import (
+                ClimbState,
+            )
 
-        # 5. Return the appropriate Decision.
+            decision_maker.change_state(ClimbState())
+
+            return Decision(
+                mode=FlightMode.CLIMB,
+                priority=report.risk,
+                reason=ThreatType.NONE,
+                message="Safe altitude reached. Transitioning to climb.",
+                confidence=1.0,
+            )
+
+        # ---------------------------------------------------------
+        # Continue takeoff.
+        # ---------------------------------------------------------
+        return Decision(
+            mode=FlightMode.TAKEOFF,
+            priority=report.risk,
+            reason=ThreatType.NONE,
+            message="Continuing takeoff.",
+            confidence=1.0,
+        )
 
     def _should_enter_emergency(self, report: FlightReport) -> bool:
-        """Return whether safety requires EMERGENCY."""
-        return NotImplementedError("_should_enter_emergency is Not Implemented")
+        """Return True if takeoff is no longer safe."""
+        return report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}
 
     def _takeoff_complete(self, report: FlightReport) -> bool:
-        """Return whether safe takeoff altitude has been reached."""
+        """Return True when the aircraft reaches a safe takeoff altitude."""
         return report.altitude >= self.safe_altitude
-

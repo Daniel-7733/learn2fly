@@ -34,6 +34,7 @@
 """
 from config import TIME_STEP
 
+from flight_systems.missions.mission import Mission
 from flight_systems.plane import Plane
 from flight_systems.autopilot import AutoPilot
 from flight_systems.flight_analyzer import FlightAnalyzer
@@ -79,8 +80,8 @@ def main() -> None:
     # ---------------------------------------------------------
     # 3. Create DecisionMaker
     # ---------------------------------------------------------
-
-    decision_maker = DecisionMaker()
+    mission = Mission(target_altitude=3000)
+    decision_maker = DecisionMaker(mission)
 
     # ---------------------------------------------------------
     # 4. Connect them through FlightSystem

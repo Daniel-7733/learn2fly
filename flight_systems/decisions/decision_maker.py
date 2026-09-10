@@ -3,8 +3,31 @@ from flight_systems.enums import FlightMode, RiskLevel, ThreatType
 from flight_systems.flight_report import FlightReport
 from flight_systems.decisions.states.cruise_state import CruiseState
 from flight_systems.decisions.states.flight_state import FlightState
+from flight_systems.missions.mission import Mission
 
 
+"""
+A new Architecure for our model
+    Mission
+       │
+       ▼
+    DecisionMaker
+       │
+       ├── owns current_state
+       └── owns mission
+                │
+                ▼
+           ClimbState
+                │
+                ▼
+             Decision
+                │
+                ▼
+             AutoPilot
+                │
+                ▼
+         FlightController
+"""
 class DecisionMaker:
     """
     Reads a FlightReport and manages flight-mode transitions.
@@ -26,8 +49,9 @@ class DecisionMaker:
                       LOW
     """
 
-    def __init__(self) -> None:
+    def __init__(self, mission: Mission) -> None:
         self.current_state: FlightState = CruiseState()
+        self.mission = mission
 
     def make_decision(self, report: FlightReport) -> Decision:
         """

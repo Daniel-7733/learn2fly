@@ -11,7 +11,7 @@ from flight_systems.enums import (
     ThreatType,
 )
 from flight_systems.flight_report import FlightReport
-
+from flight_systems.missions.mission import Mission
 
 # ==================================================================
 #                 How to use pytest
@@ -108,7 +108,8 @@ from flight_systems.flight_report import FlightReport
 )
 def test_make_decision(report: FlightReport, expected_state_type: type[FlightState], expected_mode: FlightMode, 
                        expected_reason: ThreatType, expected_priority: RiskLevel) -> None:
-    decision_maker = DecisionMaker()
+    mission = Mission(target_altitude=3000.0)
+    decision_maker = DecisionMaker(mission)
 
     decision = decision_maker.make_decision(report)
 
@@ -121,7 +122,8 @@ def test_make_decision(report: FlightReport, expected_state_type: type[FlightSta
     assert decision.priority is expected_priority
 
 def test_cruise_to_emergency_and_back_to_cruise() -> None:
-    decision_maker = DecisionMaker()
+    mission = Mission(target_altitude=3000.0)
+    decision_maker = DecisionMaker(mission)
 
     critical_report = FlightReport(
         speed_margin=10.0,
@@ -178,7 +180,8 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
     assert third_safe_decision.mode is FlightMode.CRUISE
 
 def test_emergency_requires_consecutive_safe_updates() -> None:
-    decision_maker = DecisionMaker()
+    mission = Mission(target_altitude=3000.0)
+    decision_maker = DecisionMaker(mission)
 
     critical_report = FlightReport(
         speed_margin=10.0,
