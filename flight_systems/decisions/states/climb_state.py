@@ -67,6 +67,7 @@ Plane → FlightReport → DecisionMaker → ClimbState
 class ClimbState(FlightState):
     """
     Handle decision and transition rules while the aircraft is climbing.
+    Question: How do I gain altitude safely?
 
     Responsibility:
         - Remain in CLIMB while approaching the mission altitude.

@@ -61,6 +61,31 @@ class FakeController:
     target_pitch: float = 0.0
     target_throttle: float = 0.0
 
+# ============================================
+#   Helper function for consistance altitude
+# ============================================
+def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
+    report = FlightReport(
+        speed_margin=50.0,
+        aoa_margin=10.0,
+        altitude=altitude,
+        time_to_stall=99.0,
+        time_to_impact=99.0,
+        most_urgent_threat=ThreatType.NONE,
+        risk=RiskLevel.LOW,
+        recoverability=Recoverability.EXCELLENT,
+        energy_state=EnergyState.HIGH,
+    )
+
+    plane = FakePlane(
+        horizontal_speed=100.0,
+        min_safe_speed=50.0,
+        aoa=5.0,
+        altitude=altitude,
+        flight_path_angle_value=-10.0,
+    )
+
+    return report, plane
 
 # ============================================
 # Test the emergency decision -> AutoPilot path
@@ -155,7 +180,7 @@ def test_emergency_decision_produces_correct_control_targets(
         horizontal_speed=100.0,
         min_safe_speed=50.0,
         aoa=5.0,
-        altitude=3000.0,
+        altitude=report.altitude,
         flight_path_angle_value=-10.0,
     )
 
@@ -198,47 +223,15 @@ def test_emergency_decision_produces_correct_control_targets(
 
 
 def test_cruise_decision_uses_normal_altitude_control() -> None:
+    mission = Mission(target_altitude=3000.0)
+    decision_maker = DecisionMaker(mission)
+
     # ============================================
     # Arrange
     # ============================================
 
-    report = FlightReport(
-        speed_margin=50.0,
-        aoa_margin=10.0,
-        altitude=2000.0,
-        time_to_stall=99.0,
-        time_to_impact=99.0,
-        most_urgent_threat=ThreatType.NONE,
-        risk=RiskLevel.LOW,
-        recoverability=Recoverability.EXCELLENT,
-        energy_state=EnergyState.HIGH,
-    )
-
-    mission = Mission(target_altitude=3000.0)
-
-    decision_maker = DecisionMaker(mission)
-
-    autopilot = AutoPilot(
-        target_altitude=3000.0,
-        altitude_gain=0.01,
-        max_pitch_command=5.0,
-    )
-
-    plane = FakePlane(
-        horizontal_speed=100.0,
-        min_safe_speed=50.0,
-        aoa=5.0,
-
-        # Important:
-        # AutoPilot receives the current aircraft altitude from Plane.
-        # For this test we want the aircraft to be below the target altitude.
-        altitude=2000.0,
-
-        # Not important for normal cruise altitude control,
-        # but FakePlane supports it because emergency stall recovery needs it.
-        flight_path_angle_value=-10.0,
-    )
-
+    autopilot = AutoPilot(target_altitude=3000.0, altitude_gain=0.01, max_pitch_command=5.0)
+    report, plane = make_cruise_scenario(altitude=2000.0)
     controller = FakeController()
 
     # ============================================
@@ -249,11 +242,7 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
     decision = decision_maker.make_decision(report)
 
     # Decision -> AutoPilot -> Controller targets
-    autopilot.update(
-        plane,
-        decision,
-        controller,
-    )
+    autopilot.update(plane, decision, controller)
 
     # ============================================
     # Assert
@@ -264,17 +253,8 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
     assert decision.reason is ThreatType.NONE
 
     # altitude_error = 3000 - 2000 = 1000
-    #
     # raw command = 1000 * 0.01 = 10
-    #
-    # max_pitch_command = 5
-    #
-    # therefore:
     # clamped command = 5
     assert controller.target_pitch == pytest.approx(5.0)
-
-    # Aircraft is below target altitude,
-    # so AutoPilot uses the climb/cruise throttle command.
     assert controller.target_throttle == pytest.approx(0.7)
-
 
