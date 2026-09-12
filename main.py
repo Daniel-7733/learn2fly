@@ -80,7 +80,12 @@ def main() -> None:
     # ---------------------------------------------------------
     # 3. Create DecisionMaker
     # ---------------------------------------------------------
-    mission = Mission(target_altitude=3000)
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            )
     decision_maker = DecisionMaker(mission)
 
     # ---------------------------------------------------------

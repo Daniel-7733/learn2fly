@@ -168,7 +168,12 @@ def test_emergency_decision_produces_correct_control_targets(
     # ============================================
 
     # DecisionMaker now requires a Mission.
-    mission = Mission(target_altitude=3000.0)
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            )
 
     decision_maker = DecisionMaker(mission)
 
@@ -223,7 +228,12 @@ def test_emergency_decision_produces_correct_control_targets(
 
 
 def test_cruise_decision_uses_normal_altitude_control() -> None:
-    mission = Mission(target_altitude=3000.0)
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            )
     decision_maker = DecisionMaker(mission)
 
     # ============================================

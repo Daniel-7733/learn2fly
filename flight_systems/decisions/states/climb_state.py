@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from math import isfinite
 from flight_systems.decisions.decision import Decision
 from flight_systems.decisions.states.flight_state import FlightState
 from flight_systems.enums import FlightMode, RiskLevel, ThreatType
@@ -84,6 +85,11 @@ class ClimbState(FlightState):
           ▼           ▼           ▼
      EMERGENCY      CRUISE       CLIMB
     """
+
+    def __init__(self, altitude_tolerance: float = 50.0) -> None:
+        if not isfinite(altitude_tolerance) or altitude_tolerance < 0:
+            raise ValueError("altitude_tolerance must be finite and non-negative")
+        self.altitude_tolerance = altitude_tolerance
 
     def handle(self, decision_maker: "DecisionMaker", report: FlightReport) -> Decision:
         """

@@ -108,7 +108,12 @@ from flight_systems.missions.mission import Mission
 )
 def test_make_decision(report: FlightReport, expected_state_type: type[FlightState], expected_mode: FlightMode, 
                        expected_reason: ThreatType, expected_priority: RiskLevel) -> None:
-    mission = Mission(target_altitude=3000.0)
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            )
     decision_maker = DecisionMaker(mission)
 
     decision = decision_maker.make_decision(report)
@@ -122,7 +127,12 @@ def test_make_decision(report: FlightReport, expected_state_type: type[FlightSta
     assert decision.priority is expected_priority
 
 def test_cruise_to_emergency_and_back_to_cruise() -> None:
-    mission = Mission(target_altitude=3000.0)
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            )
     decision_maker = DecisionMaker(mission)
 
     critical_report = FlightReport(
@@ -180,7 +190,12 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
     assert third_safe_decision.mode is FlightMode.CRUISE
 
 def test_emergency_requires_consecutive_safe_updates() -> None:
-    mission = Mission(target_altitude=3000.0)
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            )
     decision_maker = DecisionMaker(mission)
 
     critical_report = FlightReport(
