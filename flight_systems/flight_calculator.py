@@ -69,6 +69,20 @@ class FlightCalculator:
         return hypot(horizontal_speed,vertical_speed)
 
     @staticmethod
+    def average_speed(previous_speed: float, speed: float) -> float:
+        return (previous_speed + speed) / 2.0
+     
+    @staticmethod
+    def descent_time(altitude_to_lose_m: float, descent_speed_mps: float) -> float:
+        if descent_speed_mps <= 0.0:
+            raise ValueError("descent_speed_mps must be greater than zero")
+        return altitude_to_lose_m / descent_speed_mps
+
+    @staticmethod
+    def horizontal_distance(horizontal_speed_mps: float, time_s: float) -> float:
+        return horizontal_speed_mps * time_s
+
+    @staticmethod
     def rate_of_change(previous_value: float, current_value: float, time_step: float) -> float:
         """rate of change = dy/dx"""
         if time_step <= 0:

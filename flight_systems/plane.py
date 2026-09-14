@@ -1,4 +1,5 @@
 from math import tan, radians, atan2, degrees
+from flight_systems.flight_calculator import FlightCalculator
 
 
 class Plane:
@@ -11,6 +12,7 @@ class Plane:
         self.horizontal_speed = horizontal_speed
         self.vertical_speed: float = 0 
         self.min_safe_speed = min_safe_speed 
+        self.distance_travelled_m = 0.0
         
         # ===== mass veriable ===== #
         self.mass = mass 
@@ -43,10 +45,14 @@ class Plane:
         self.aoa = self.calculate_aoa()
 
         # Update horizontal motion using the current AoA for drag.
+        previous_horizontal_speed = self.horizontal_speed
         self.calculate_horizontal_speed(dt)
 
         # Horizontal speed changed, so refresh AoA before calculating lift.
         self.aoa = self.calculate_aoa()
+
+        average_horizontal_speed = FlightCalculator.average_speed(previous_horizontal_speed, self.horizontal_speed)
+        self.distance_travelled_m += average_horizontal_speed * dt
 
         lift_force: float = self.calculate_lift()
         vertical_drag: float = self.calculate_vertical_drag()
