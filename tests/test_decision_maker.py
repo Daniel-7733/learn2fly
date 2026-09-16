@@ -113,6 +113,7 @@ def test_make_decision(report: FlightReport, expected_state_type: type[FlightSta
             cruise_speed=100.0,
             route_distance=100_000.0,
             landing_speed=55.0,
+            planned_descent_speed_mps=0.5,
             )
     decision_maker = DecisionMaker(mission)
 
@@ -132,6 +133,7 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
             cruise_speed=100.0,
             route_distance=100_000.0,
             landing_speed=55.0,
+            planned_descent_speed_mps=0.5,
             )
     decision_maker = DecisionMaker(mission)
 
@@ -195,6 +197,7 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
             cruise_speed=100.0,
             route_distance=100_000.0,
             landing_speed=55.0,
+            planned_descent_speed_mps=0.5,
             )
     decision_maker = DecisionMaker(mission)
 

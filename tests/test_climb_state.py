@@ -41,6 +41,7 @@ def test_climb_continues_below_completion_altitude() -> None:
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
+        planned_descent_speed_mps=0.5,
     )
 
     decision_maker = DecisionMaker(mission)
@@ -62,6 +63,7 @@ def test_climb_transitions_to_cruise_at_completion_boundary() -> None:
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
+        planned_descent_speed_mps=0.5,
     )
 
     decision_maker = DecisionMaker(mission)
@@ -83,6 +85,7 @@ def test_unsafe_climb_enters_emergency_despite_reaching_mission_altitude() -> No
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
+        planned_descent_speed_mps=0.5,
     )
 
     decision_maker = DecisionMaker(mission)
@@ -102,6 +105,7 @@ def test_climb_decision_depends_on_mission_target() -> None:
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
+        planned_descent_speed_mps=0.5,
     )
 
     higher_decision_maker = DecisionMaker(higher_mission)

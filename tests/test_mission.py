@@ -11,6 +11,8 @@ from flight_systems.missions.mission import Mission
         "cruise_speed",
         "route_distance",
         "landing_speed",
+        "planned_descent_speed_mps",
+
     ],
 )
 @pytest.mark.parametrize(
@@ -33,6 +35,7 @@ def test_mission_rejects_invalid_values(
         "cruise_speed": 100.0,
         "route_distance": 100_000.0,
         "landing_speed": 55.0,
+        "planned_descent_speed_mps": 10.0,
     }
 
     # Replace only the field currently being tested.
@@ -50,6 +53,7 @@ def test_mission_accepts_valid_values() -> None:
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
+        planned_descent_speed_mps=5.0,
     )
 
     # Assert
@@ -57,14 +61,17 @@ def test_mission_accepts_valid_values() -> None:
     assert mission.cruise_speed == 100.0
     assert mission.route_distance == 100_000.0
     assert mission.landing_speed == 55.0
+    assert mission.planned_descent_speed_mps == 5.0
 
 def test_mission_is_immutable() -> None:
     mission = Mission(
-        target_altitude=3000.0,
-        cruise_speed=100.0,
-        route_distance=100_000.0,
-        landing_speed=55.0,
-    )
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            planned_descent_speed_mps=5.0,
+        )
 
     with pytest.raises(AttributeError):
         mission.target_altitude = 4000.0  # type: ignore[misc]
+

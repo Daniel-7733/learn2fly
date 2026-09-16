@@ -16,29 +16,26 @@ class MissionPlanner:
 
         return max(0.0, self.mission.route_distance - distance_travelled_m)
 
-    def required_descent_distance(self, current_altitude_m: float, horizontal_speed_mps: float,
-                                  planned_descent_speed_mps: float) -> float:
+    def required_descent_distance(self, current_altitude_m: float, horizontal_speed_mps: float) -> float:
 
-        descent_t = FlightCalculator.descent_time(current_altitude_m, planned_descent_speed_mps)
+        descent_t = FlightCalculator.descent_time(current_altitude_m, self.mission.planned_descent_speed_mps)
         horizontal_d = FlightCalculator.horizontal_distance(horizontal_speed_mps, descent_t)
                                  
         return horizontal_d
 
 
     def should_begin_descent(self, distance_travelled_m: float, current_altitude_m: float,
-                             current_horizontal_speed_mps: float, planned_descent_speed_mps: float,
-                             ) -> bool:
+                             current_horizontal_speed_mps: float) -> bool:
         """
         Responsibility:
             True  → descent should begin
             False → continue cruising
         """
-        distance_remaining_v = self.distance_remaining(distance_travelled_m)
-        required_descent_distance_v = self.required_descent_distance(current_altitude_m, 
-                                                                     current_horizontal_speed_mps,
-                                                                     planned_descent_speed_mps)
+        remaining_distance_m = self.distance_remaining(distance_travelled_m)
+        required_distance_m = self.required_descent_distance(current_altitude_m,
+                                                                     current_horizontal_speed_mps)
 
-        if distance_remaining_v <= required_descent_distance_v:
+        if remaining_distance_m <= required_distance_m:
             return True
         return False
 
