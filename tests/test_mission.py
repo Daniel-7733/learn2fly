@@ -79,3 +79,23 @@ def test_mission_is_immutable() -> None:
     with pytest.raises(AttributeError):
         mission.target_altitude = 4000.0  # type: ignore[misc]
 
+@pytest.mark.parametrize(
+    "landing_transition_altitude_m",
+    [
+        3000.0,  # Equal to target altitude
+        3500.0,  # Above target altitude
+    ],
+)
+def test_mission_rejects_invalid_landing_transition_relationship(
+    landing_transition_altitude_m: float,
+) -> None:
+    with pytest.raises(ValueError, match="landing_transition_altitude_m"):
+        Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            planned_descent_speed_mps=5.0,
+            landing_transition_altitude_m=(landing_transition_altitude_m),
+        )
+
