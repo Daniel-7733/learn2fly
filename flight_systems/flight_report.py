@@ -7,7 +7,13 @@ if TYPE_CHECKING:
 
 class FlightReport:
     def __init__(self, speed_margin: float, aoa_margin: float, altitude: float, time_to_stall: float, time_to_impact: float, 
-                 most_urgent_threat: "ThreatType", risk: "RiskLevel", recoverability: "Recoverability", energy_state: "EnergyState") -> None:
+                 most_urgent_threat: "ThreatType", risk: "RiskLevel", recoverability: "Recoverability", energy_state: "EnergyState",
+                 horizontal_speed: float, distance_travelled_m: float) -> None:
+        """
+        The responsibility is:
+            FlightReport
+                Carries the current values; it does not calculate or own them
+        """
 
         self.speed_margin = speed_margin
         self.aoa_margin = aoa_margin
@@ -18,6 +24,8 @@ class FlightReport:
         self.risk = risk
         self.recoverability = recoverability
         self.energy_state = energy_state
+        self.horizontal_speed = horizontal_speed
+        self.distance_travelled_m = distance_travelled_m
 
     def __str__(self) -> str:
         """Returns a human-readable telemetry dashboard for printing."""

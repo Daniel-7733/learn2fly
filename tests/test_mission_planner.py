@@ -18,7 +18,8 @@ def test_distance_remaining(distance_travelled_m: float, expected_remaining_m: f
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
-        planned_descent_speed_mps=5.0
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=2000.0,
     )
     planner = MissionPlanner(mission)
     remaining_m = planner.distance_remaining(distance_travelled_m)
@@ -44,6 +45,7 @@ def test_required_descent_distance(planned_descent_speed: float, expected_horizo
         route_distance=100_000.0,
         landing_speed=55.0,
         planned_descent_speed_mps=planned_descent_speed,
+        landing_transition_altitude_m=2000.0,
     )
 
     planner = MissionPlanner(mission)
@@ -67,7 +69,8 @@ def test_should_begin_descent(distance_travelled_m: float, expected_result: bool
         cruise_speed=100.0,
         route_distance=100_000.0,
         landing_speed=55.0,
-        planned_descent_speed_mps=5.0
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=2000.0,
     )
     
     planner = MissionPlanner(mission)

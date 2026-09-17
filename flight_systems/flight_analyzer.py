@@ -273,4 +273,6 @@ class FlightAnalyzer:
             risk,
             recoverability,
             energy_state,
+            self.plane.horizontal_speed,
+            self.plane.distance_travelled_m,
         )

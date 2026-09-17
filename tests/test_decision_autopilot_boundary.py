@@ -75,6 +75,8 @@ def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
         risk=RiskLevel.LOW,
         recoverability=Recoverability.EXCELLENT,
         energy_state=EnergyState.HIGH,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
     plane = FakePlane(
@@ -127,6 +129,8 @@ def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
                 risk=RiskLevel.CRITICAL,
                 recoverability=Recoverability.POOR,
                 energy_state=EnergyState.LOW,
+                horizontal_speed = 100.0,
+                distance_travelled_m = 30_000.0,
             ),
             FlightMode.EMERGENCY,
             ThreatType.STALL,
@@ -148,6 +152,8 @@ def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
                 risk=RiskLevel.CRITICAL,
                 recoverability=Recoverability.IMPOSSIBLE,
                 energy_state=EnergyState.MODERATE,
+                horizontal_speed = 100.0,
+                distance_travelled_m = 30_000.0,
             ),
             FlightMode.EMERGENCY,
             ThreatType.IMPACT,
@@ -174,6 +180,7 @@ def test_emergency_decision_produces_correct_control_targets(
             route_distance=100_000.0,
             landing_speed=55.0,
             planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000.0,
             )
 
     decision_maker = DecisionMaker(mission)
@@ -235,6 +242,7 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
             route_distance=100_000.0,
             landing_speed=55.0,
             planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000.0,
             )
     decision_maker = DecisionMaker(mission)
 

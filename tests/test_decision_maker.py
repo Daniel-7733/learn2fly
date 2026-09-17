@@ -54,6 +54,8 @@ from flight_systems.missions.mission import Mission
                 risk=RiskLevel.CRITICAL,
                 recoverability=Recoverability.POOR,
                 energy_state=EnergyState.LOW,
+                horizontal_speed = 100.0,
+                distance_travelled_m = 30_000.0,
             ),
             EmergencyState,
             FlightMode.EMERGENCY,
@@ -76,6 +78,8 @@ from flight_systems.missions.mission import Mission
                 risk=RiskLevel.CRITICAL,
                 recoverability=Recoverability.IMPOSSIBLE,
                 energy_state=EnergyState.MODERATE,
+                horizontal_speed = 100.0,
+                distance_travelled_m = 30_000.0,
             ),
             EmergencyState,
             FlightMode.EMERGENCY,
@@ -98,6 +102,8 @@ from flight_systems.missions.mission import Mission
                 risk=RiskLevel.LOW,
                 recoverability=Recoverability.EXCELLENT,
                 energy_state=EnergyState.HIGH,
+                horizontal_speed = 100.0,
+                distance_travelled_m = 30_000.0,
             ),
             CruiseState,
             FlightMode.CRUISE,
@@ -114,6 +120,7 @@ def test_make_decision(report: FlightReport, expected_state_type: type[FlightSta
             route_distance=100_000.0,
             landing_speed=55.0,
             planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000.0,
             )
     decision_maker = DecisionMaker(mission)
 
@@ -134,6 +141,7 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
             route_distance=100_000.0,
             landing_speed=55.0,
             planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000.0,
             )
     decision_maker = DecisionMaker(mission)
 
@@ -147,6 +155,8 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
         risk=RiskLevel.CRITICAL,
         recoverability=Recoverability.POOR,
         energy_state=EnergyState.LOW,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
     safe_report = FlightReport(
@@ -159,6 +169,8 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
         risk=RiskLevel.LOW,
         recoverability=Recoverability.EXCELLENT,
         energy_state=EnergyState.HIGH,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
     # The DecisionMaker begins in cruise.
@@ -198,6 +210,7 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
             route_distance=100_000.0,
             landing_speed=55.0,
             planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000.0,
             )
     decision_maker = DecisionMaker(mission)
 
@@ -211,6 +224,8 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
         risk=RiskLevel.CRITICAL,
         recoverability=Recoverability.POOR,
         energy_state=EnergyState.LOW,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
     safe_report = FlightReport(
@@ -223,6 +238,8 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
         risk=RiskLevel.LOW,
         recoverability=Recoverability.EXCELLENT,
         energy_state=EnergyState.HIGH,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
     moderate_report = FlightReport(
@@ -235,6 +252,8 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
         risk=RiskLevel.MODERATE,
         recoverability=Recoverability.GOOD,
         energy_state=EnergyState.MODERATE,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
     # Enter EmergencyState.

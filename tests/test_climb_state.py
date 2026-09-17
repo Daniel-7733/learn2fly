@@ -18,6 +18,8 @@ def make_safe_report(altitude: float) -> FlightReport:
         risk=RiskLevel.LOW,
         recoverability=Recoverability.EXCELLENT,
         energy_state=EnergyState.HIGH,
+        horizontal_speed = 100.0,
+        distance_travelled_m = 30_000.0,
     )
 
 
@@ -32,6 +34,8 @@ def make_high_risk_stall_report(altitude: float) -> FlightReport:
             risk=RiskLevel.HIGH,
             recoverability=Recoverability.GOOD,
             energy_state=EnergyState.LOW,
+            horizontal_speed = 100.0,
+            distance_travelled_m = 30_000.0,
             )
 
 
@@ -42,6 +46,7 @@ def test_climb_continues_below_completion_altitude() -> None:
         route_distance=100_000.0,
         landing_speed=55.0,
         planned_descent_speed_mps=0.5,
+        landing_transition_altitude_m=2000.0,
     )
 
     decision_maker = DecisionMaker(mission)
@@ -64,6 +69,7 @@ def test_climb_transitions_to_cruise_at_completion_boundary() -> None:
         route_distance=100_000.0,
         landing_speed=55.0,
         planned_descent_speed_mps=0.5,
+        landing_transition_altitude_m=2000.0,
     )
 
     decision_maker = DecisionMaker(mission)
@@ -86,6 +92,7 @@ def test_unsafe_climb_enters_emergency_despite_reaching_mission_altitude() -> No
         route_distance=100_000.0,
         landing_speed=55.0,
         planned_descent_speed_mps=0.5,
+        landing_transition_altitude_m=2000.0,
     )
 
     decision_maker = DecisionMaker(mission)
@@ -106,6 +113,7 @@ def test_climb_decision_depends_on_mission_target() -> None:
         route_distance=100_000.0,
         landing_speed=55.0,
         planned_descent_speed_mps=0.5,
+        landing_transition_altitude_m=2000.0,
     )
 
     higher_decision_maker = DecisionMaker(higher_mission)

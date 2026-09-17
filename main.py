@@ -85,7 +85,8 @@ def main() -> None:
             cruise_speed=100.0,
             route_distance=100_000.0,
             landing_speed=55.0,
-            planned_descent_speed_mps=0.5
+            planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000,
             )
     decision_maker = DecisionMaker(mission)
 

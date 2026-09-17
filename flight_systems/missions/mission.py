@@ -44,6 +44,7 @@ class Mission:
     route_distance: float     # → Determines mission progress
     landing_speed: float      # → Landing goal
     planned_descent_speed_mps: float
+    landing_transition_altitude_m: float
 
     def __post_init__(self) -> None:
         if not isfinite(self.target_altitude) or self.target_altitude <= 0:
@@ -60,4 +61,7 @@ class Mission:
         
         if not isfinite(self.planned_descent_speed_mps) or self.planned_descent_speed_mps <= 0:
             raise ValueError("planned_descent_speed_mps must be finite and greater than zero")
+
+        if not isfinite(self.landing_transition_altitude_m) or self.landing_transition_altitude_m <= 0 or self.landing_transition_altitude_m >= self.target_altitude:
+            raise ValueError("landing_transition_altitude_m should not be infinit, less then 0 or bigger then target altitude")
 
