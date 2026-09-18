@@ -53,20 +53,20 @@ class DescentState(FlightState):
         # ---------------------------------------------------------
         # Landing transition will be added in the next step. (Descent completed successfully.)
         # ---------------------------------------------------------
-        # if self._landing_phase_reached(report, mission.landing_transition_altitude_m):
-        #     from flight_systems.decisions.states.emergency_state import (
-        #             Landing_State,
-        #             )
-        #
-        #     decision_maker.change_state(Landing_State())
-        #
-        #     return Decision(
-        #         mode=FlightMode.LANDING,
-        #         priority=report.risk,
-        #         reason=ThreatType.NONE,
-        #         message="Safe Landing reached. Transitioning to Landing.",
-        #         confidence=1.0,
-        #     )
+        if self._landing_phase_reached(report, decision_maker.mission.landing_transition_altitude_m):
+            from flight_systems.decisions.states.landing_state import (
+                LandingState,
+            )
+
+            decision_maker.change_state(LandingState())
+
+            return Decision(
+                mode=FlightMode.LANDING,
+                priority=report.risk,
+                reason=ThreatType.NONE,
+                message="Safe Landing reached. Transitioning to Landing.",
+                confidence=1.0,
+            )
         # ---------------------------------------------------------
         # Continue descending.
         # ---------------------------------------------------------
@@ -82,5 +82,5 @@ class DescentState(FlightState):
         """Return True when descent conditions are unsafe."""
         return report.risk in {RiskLevel.HIGH, RiskLevel.CRITICAL}
 
-    def _landing_phase_reached(report: FlightReport, landing_transition_altitude_m: Mission) -> bool:
+    def _landing_phase_reached(self, report: FlightReport, landing_transition_altitude_m: float) -> bool:
         return report.altitude <= landing_transition_altitude_m

@@ -1,6 +1,8 @@
+import pytest
 from flight_systems.decisions.decision_maker import DecisionMaker
 from flight_systems.decisions.states.descent_state import DescentState
 from flight_systems.decisions.states.emergency_state import EmergencyState
+from flight_systems.decisions.states.landing_state import LandingState
 from flight_systems.enums import (
     EnergyState,
     FlightMode,
@@ -118,3 +120,31 @@ def test_unsafe_descent_enters_emergency_even_below_landing_transition_altitude(
         EmergencyState,
     )
 
+@pytest.mark.parametrize(
+    "altitude",
+    [
+        300.0,  # Exact landing-transition boundary
+        299.0,  # Below the landing-transition boundary
+    ],
+)
+def test_safe_descent_transitions_to_landing_at_or_below_boundary(altitude: float) -> None:
+    # Arrange
+    mission = make_mission()
+    decision_maker = DecisionMaker(mission)
+
+    # We are testing the transition FROM DescentState.
+    decision_maker.change_state(DescentState())
+
+    report = make_safe_report(altitude=altitude)
+
+    # Act
+    decision = decision_maker.make_decision(report)
+
+    # Assert
+    assert decision.mode is FlightMode.LANDING
+    assert decision.reason is ThreatType.NONE
+    assert decision.priority is RiskLevel.LOW
+    assert isinstance(
+        decision_maker.current_state,
+        LandingState,
+    )
