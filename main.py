@@ -59,10 +59,27 @@ def main() -> None:
     )
 
     # ---------------------------------------------------------
-    # 2. Create the aircraft specialists
+    # 2. Create the Mission
+
+    #                     ┌→ DecisionMaker → MissionPlanner
+    #   Mission ──────────┤
+    #                     └→ AutoPilot
     # ---------------------------------------------------------
 
-    autopilot = AutoPilot()
+    mission = Mission(
+            target_altitude=3000.0,
+            cruise_speed=100.0,
+            route_distance=100_000.0,
+            landing_speed=55.0,
+            planned_descent_speed_mps=0.5,
+            landing_transition_altitude_m=2000,
+            )
+
+    # ---------------------------------------------------------
+    # 3. Create the aircraft specialists
+    # ---------------------------------------------------------
+
+    autopilot = AutoPilot(mission)
 
     flight_controller = FlightController(
         target_pitch=plane.pitch_angle,
@@ -78,20 +95,13 @@ def main() -> None:
 
 
     # ---------------------------------------------------------
-    # 3. Create DecisionMaker
+    # 4. Create DecisionMaker
     # ---------------------------------------------------------
-    mission = Mission(
-            target_altitude=3000.0,
-            cruise_speed=100.0,
-            route_distance=100_000.0,
-            landing_speed=55.0,
-            planned_descent_speed_mps=0.5,
-            landing_transition_altitude_m=2000,
-            )
+
     decision_maker = DecisionMaker(mission)
 
     # ---------------------------------------------------------
-    # 4. Connect them through FlightSystem
+    # 5. Connect them through FlightSystem
     # ---------------------------------------------------------
 
     flight_system = FlightSystem(
@@ -103,7 +113,7 @@ def main() -> None:
     )
 
     # ---------------------------------------------------------
-    # 4. Create and start the simulated world
+    # 6. Create and start the simulated world
     # ---------------------------------------------------------
 
     simulation = Simulation(

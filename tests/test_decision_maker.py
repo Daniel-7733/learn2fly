@@ -88,7 +88,7 @@ from flight_systems.missions.mission import Mission
         ),
 
         # ==================================
-        #      Normal low-risk flight
+        # Normal low-risk flight before the descent boundary
         # ==================================
 
         (

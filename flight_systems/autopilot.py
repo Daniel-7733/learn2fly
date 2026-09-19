@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from .flight_calculator import FlightCalculator
 from .enums import FlightMode, ThreatType
+from .missions.mission import Mission
 
 if TYPE_CHECKING:
     from .plane import Plane
@@ -17,16 +18,19 @@ class AutoPilot:
     It gives target values to FlightController.
     """
 
-    def __init__(self, target_speed: float = 100.0, speed_deadband: float = 5.0, target_altitude: float = 3000.0, 
-                 altitude_deadband: float = 50.0, altitude_gain: float = 0.01, max_pitch_command: float = 5.0,
-                 recovery_target_aoa: float = 4.0, minimum_recovery_pitch: float = -30.0, maximum_recovery_pitch: float = 10.0) -> None:
+    def __init__(self, mission: Mission, speed_deadband: float = 5.0, 
+                 altitude_deadband: float = 50.0, 
+                 altitude_gain: float = 0.01, max_pitch_command: float = 5.0,
+                 recovery_target_aoa: float = 4.0, minimum_recovery_pitch: float = -30.0, 
+                 maximum_recovery_pitch: float = 10.0) -> None:
+
+        # Mission goals are immutable and shared with DecisionMaker.
+        self.mission = mission
 
         # Speed-control configuration
-        self.target_speed = target_speed
         self.speed_deadband = speed_deadband
 
         # Altitude-control configuration
-        self.target_altitude = target_altitude
         self.altitude_deadband = altitude_deadband
         self.altitude_gain = altitude_gain
 
@@ -108,7 +112,7 @@ class AutoPilot:
         # ---------------------------------------------------------
 
         altitude_error = FlightCalculator.calculate_error(
-            self.target_altitude,
+            self.mission.target_altitude,
             plane.altitude,
         )
 

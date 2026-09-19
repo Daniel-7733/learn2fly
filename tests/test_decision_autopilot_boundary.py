@@ -185,7 +185,7 @@ def test_emergency_decision_produces_correct_control_targets(
 
     decision_maker = DecisionMaker(mission)
 
-    autopilot = AutoPilot()
+    autopilot = AutoPilot(mission=mission)
 
     # The fake plane gives AutoPilot only the information
     # required for this boundary test.
@@ -250,7 +250,7 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
     # Arrange
     # ============================================
 
-    autopilot = AutoPilot(target_altitude=3000.0, altitude_gain=0.01, max_pitch_command=5.0)
+    autopilot = AutoPilot(mission=mission, altitude_gain=0.01, max_pitch_command=5.0)
     report, plane = make_cruise_scenario(altitude=2000.0)
     controller = FakeController()
 
