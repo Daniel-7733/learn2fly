@@ -32,6 +32,22 @@ class CruiseState(FlightState):
                 confidence=1.0
             )
 
+        if decision_maker.mission_planner.should_begin_descent(
+                report.distance_travelled_m,
+                report.altitude,
+                report.horizontal_speed):
+            from flight_systems.decisions.states.descent_state import DescentState
+
+            decision_maker.change_state(DescentState())
+
+            return Decision(
+                mode=FlightMode.DESCENT,
+                priority=report.risk,
+                reason=ThreatType.NONE,
+                message="Descent point reached. Transitioning from cruise to descent.",
+                confidence=1.0
+            )
+
         return Decision(
             mode=FlightMode.CRUISE,
             priority=report.risk,

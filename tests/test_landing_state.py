@@ -84,33 +84,3 @@ def test_unsafe_landing() -> None:
     assert decision.priority is RiskLevel.HIGH
     assert isinstance(decision_maker.current_state, EmergencyState)
 
-
-# def test_safe_lower_altitude_landing() -> None:
-#     mission = make_mission()
-#     decision_maker = DecisionMaker(mission)
-#     decision_maker.change_state(LandingState())
-#     report = make_safe_report(altitude=299.0)
-#     decision = decision_maker.make_decision(report)
-#
-#     assert decision.mode is FlightMode.LANDING
-#     assert decision.reason is ThreatType.NONE
-#     assert decision.priority is RiskLevel.LOW
-#     assert isinstance(
-#         decision_maker.current_state,
-#         LandingState,
-#     )
-#
-# def test_safe_low_altitude_landing() -> None:
-#     mission = make_mission()
-#     decision_maker = DecisionMaker(mission)
-#     decision_maker.change_state(LandingState())
-#     report = make_safe_report(altitude=301.0)
-#     decision = decision_maker.make_decision(report)
-#
-#     assert decision.mode is FlightMode.LANDING
-#     assert decision.reason is ThreatType.NONE
-#     assert decision.priority is RiskLevel.LOW
-#     assert isinstance(
-#         decision_maker.current_state,
-#         LandingState,
-#     )

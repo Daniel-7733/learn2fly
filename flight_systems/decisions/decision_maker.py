@@ -4,6 +4,7 @@ from flight_systems.flight_report import FlightReport
 from flight_systems.decisions.states.cruise_state import CruiseState
 from flight_systems.decisions.states.flight_state import FlightState
 from flight_systems.missions.mission import Mission
+from flight_systems.missions.mission_planner import MissionPlanner
 
 
 """
@@ -52,6 +53,7 @@ class DecisionMaker:
     def __init__(self, mission: Mission) -> None:
         self.current_state: FlightState = CruiseState()
         self.mission = mission
+        self.mission_planner = MissionPlanner(mission)
 
     def make_decision(self, report: FlightReport) -> Decision:
         """
