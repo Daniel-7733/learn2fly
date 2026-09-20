@@ -19,8 +19,8 @@ class AutoPilot:
     """
 
     def __init__(self, mission: Mission, speed_deadband: float = 5.0, 
-                 altitude_deadband: float = 50.0, 
-                 altitude_gain: float = 0.01, max_pitch_command: float = 5.0,
+                 altitude_deadband: float = 50.0, altitude_gain: float = 0.01, 
+                 descent_vertical_speed_gain: float = 1.0, max_pitch_command: float = 5.0,
                  recovery_target_aoa: float = 4.0, minimum_recovery_pitch: float = -30.0, 
                  maximum_recovery_pitch: float = 10.0) -> None:
 
@@ -42,6 +42,11 @@ class AutoPilot:
         self.recovery_target_aoa = recovery_target_aoa
         self.minimum_recovery_pitch = minimum_recovery_pitch
         self.maximum_recovery_pitch = maximum_recovery_pitch
+
+        # Control value
+        self.descent_vertical_speed_gain = 1.0
+        self.descent_vertical_speed_gain = descent_vertical_speed_gain
+
 
     def update(self, plane: "Plane", decision: "Decision", controller: "FlightController") -> None:
         """
@@ -95,9 +100,7 @@ class AutoPilot:
         # being integrated. Later, DecisionMaker should own them.
         # ---------------------------------------------------------
 
-        if plane.horizontal_speed < (
-            plane.min_safe_speed - self.speed_deadband
-        ):
+        if plane.horizontal_speed < (plane.min_safe_speed - self.speed_deadband):
             controller.target_pitch = -5.0
             controller.target_throttle = 1.0
             return
@@ -108,7 +111,44 @@ class AutoPilot:
             return
 
         # ---------------------------------------------------------
-        # 3. Normal altitude-control strategy
+        # 3. Descent control strategy
+        # ---------------------------------------------------------
+
+        if decision.mode is FlightMode.DESCENT:
+            target_vertical_speed_mps = (-self.mission.planned_descent_speed_mps)
+
+            vertical_speed_error = FlightCalculator.calculate_error(
+                target_vertical_speed_mps,
+                plane.vertical_speed,
+            )
+
+            pitch_command = FlightCalculator.proportional_command(
+                self.descent_vertical_speed_gain,
+                vertical_speed_error,
+            )
+
+            controller.target_pitch = FlightCalculator.clamp(
+                pitch_command,
+                -self.max_pitch_command,
+                self.max_pitch_command,
+            )
+
+            # Maintain cruise speed during the initial descent.
+            if plane.horizontal_speed < (self.mission.cruise_speed - self.speed_deadband):
+                controller.target_throttle = 0.7
+
+            elif plane.horizontal_speed > (self.mission.cruise_speed + self.speed_deadband):
+                controller.target_throttle = 0.3
+
+            else:
+                controller.target_throttle = 0.5
+
+            # Prevent normal altitude control from overwriting
+            # the descent commands.
+            return
+
+        # ---------------------------------------------------------
+        # 4. normal altitude-control strategy
         # ---------------------------------------------------------
 
         altitude_error = FlightCalculator.calculate_error(
@@ -116,7 +156,7 @@ class AutoPilot:
             plane.altitude,
         )
 
-        # Inside the acceptable altitude range, command level flight.
+        # inside the acceptable altitude range, command level flight.
         if abs(altitude_error) <= self.altitude_deadband:
             controller.target_pitch = 0.0
             controller.target_throttle = 0.5

@@ -4,6 +4,8 @@ import pytest
 
 from flight_systems.autopilot import AutoPilot
 from flight_systems.decisions.decision_maker import DecisionMaker
+from flight_systems.decisions.decision import Decision
+
 from flight_systems.enums import (
     EnergyState,
     FlightMode,
@@ -22,29 +24,15 @@ from flight_systems.missions.mission import Mission
 
 @dataclass
 class FakePlane:
-    """
-    Provides only the Plane attributes and methods AutoPilot needs.
-
-    Physics is intentionally excluded from this test.
-
-    This fake exists because this test is checking the boundary between:
-        DecisionMaker -> Decision -> AutoPilot -> Controller
-
-    We do not need the full Plane physics engine here.
-    """
-
     horizontal_speed: float
     min_safe_speed: float
     aoa: float
     altitude: float
 
-    # Used by AutoPilot during stall recovery.
-    # The real Plane calculates this from its motion.
-    # Here we provide a fixed value so the test stays deterministic.
+    vertical_speed: float = 0.0
     flight_path_angle_value: float = 0.0
 
     def flight_path_angle(self) -> float:
-        """Return the fake flight-path angle used by AutoPilot."""
         return self.flight_path_angle_value
 
 
@@ -278,3 +266,142 @@ def test_cruise_decision_uses_normal_altitude_control() -> None:
     assert controller.target_pitch == pytest.approx(5.0)
     assert controller.target_throttle == pytest.approx(0.7)
 
+
+@pytest.mark.parametrize(
+    (
+        "actual_vertical_speed",
+        "expected_pitch",
+    ),
+    [
+        (0.0, -5.0),   # Not descending yet: command nose down
+        (-10.0, 5.0),  # Descending too quickly: command nose up
+    ],
+)
+def test_descent_control_corrects_vertical_speed(
+    actual_vertical_speed: float,
+    expected_pitch: float,
+) -> None:
+    # ---------------------------------------------------------
+    # Arrange
+    # ---------------------------------------------------------
+    mission = Mission(
+        target_altitude=3000.0,
+        cruise_speed=100.0,
+        route_distance=100_000.0,
+        landing_speed=55.0,
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=300.0,
+    )
+
+    autopilot = AutoPilot(
+        mission=mission,
+        descent_vertical_speed_gain=1.0,
+    )
+
+    decision = Decision(
+        mode=FlightMode.DESCENT,
+        priority=RiskLevel.LOW,
+        reason=ThreatType.NONE,
+        message="Continue descent.",
+        confidence=1.0,
+    )
+
+    plane = FakePlane(
+        horizontal_speed=100.0,
+        min_safe_speed=50.0,
+        aoa=5.0,
+        altitude=3000.0,
+        vertical_speed=actual_vertical_speed,
+    )
+
+    controller = FakeController()
+
+    # ---------------------------------------------------------
+    # Act
+    # ---------------------------------------------------------
+    autopilot.update(
+        plane,
+        decision,
+        controller,
+    )
+
+    # ---------------------------------------------------------
+    # Assert
+    # ---------------------------------------------------------
+    assert controller.target_pitch == pytest.approx(
+        expected_pitch
+    )
+
+    # Horizontal speed is exactly at the cruise-speed target.
+    assert controller.target_throttle == pytest.approx(0.5)
+
+
+@pytest.mark.parametrize(
+    (
+        "actual_horizontal_speed",
+        "expected_throttle",
+    ),
+    [
+        (90.0, 0.7),   # Too slow: add throttle
+        (100.0, 0.5),  # Inside deadband: neutral throttle
+        (110.0, 0.3),  # Too fast: reduce throttle
+    ],
+)
+def test_descent_control_corrects_horizontal_speed(
+    actual_horizontal_speed: float,
+    expected_throttle: float,
+) -> None:
+    # ---------------------------------------------------------
+    # Arrange
+    # ---------------------------------------------------------
+    mission = Mission(
+        target_altitude=3000.0,
+        cruise_speed=100.0,
+        route_distance=100_000.0,
+        landing_speed=55.0,
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=300.0,
+    )
+
+    autopilot = AutoPilot(
+        mission=mission,
+        descent_vertical_speed_gain=1.0,
+    )
+
+    decision = Decision(
+        mode=FlightMode.DESCENT,
+        priority=RiskLevel.LOW,
+        reason=ThreatType.NONE,
+        message="Continue descent.",
+        confidence=1.0,
+    )
+
+    plane = FakePlane(
+        horizontal_speed=actual_horizontal_speed,
+        min_safe_speed=50.0,
+        aoa=5.0,
+        altitude=3000.0,
+        vertical_speed=0.0,
+    )
+
+    controller = FakeController()
+
+    # ---------------------------------------------------------
+    # Act
+    # ---------------------------------------------------------
+    autopilot.update(
+        plane,
+        decision,
+        controller,
+    )
+
+    # ---------------------------------------------------------
+    # Assert
+    # ---------------------------------------------------------
+    assert controller.target_throttle == pytest.approx(
+        expected_throttle
+    )
+
+    # Target vertical speed is -5 m/s, actual is 0 m/s:
+    # error = -5 - 0 = -5, so pitch command is -5°.
+    assert controller.target_pitch == pytest.approx(-5.0)
