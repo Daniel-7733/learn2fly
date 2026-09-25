@@ -46,7 +46,10 @@ class AutoPilot:
         # Control value
         self.descent_vertical_speed_gain = 1.0
         self.descent_vertical_speed_gain = descent_vertical_speed_gain
-
+        
+        # Landing configuration
+        self.landing_vertical_speed_mps = 1.5
+        self.landing_vertical_speed_gain = 1.0
 
     def update(self, plane: "Plane", decision: "Decision", controller: "FlightController") -> None:
         """
@@ -109,9 +112,47 @@ class AutoPilot:
             controller.target_pitch = -5.0
             controller.target_throttle = 1.0
             return
-
+        
         # ---------------------------------------------------------
-        # 3. Descent control strategy
+        # 3. Landing control
+        # ---------------------------------------------------------
+
+        if decision.mode is FlightMode.LANDING:
+            target_vertical_speed = -self.landing_vertical_speed_mps
+
+            vertical_speed_error = FlightCalculator.calculate_error(
+                target_vertical_speed,
+                plane.vertical_speed,
+            )
+
+            pitch_command = FlightCalculator.proportional_command(
+                self.landing_vertical_speed_gain,
+                vertical_speed_error,
+            )
+
+            controller.target_pitch = FlightCalculator.clamp(
+                pitch_command,
+                -self.max_pitch_command,
+                self.max_pitch_command,
+            )
+
+            if plane.horizontal_speed < (
+                self.mission.landing_speed - self.speed_deadband
+            ):
+                controller.target_throttle = 0.7
+
+            elif plane.horizontal_speed > (
+                self.mission.landing_speed + self.speed_deadband
+            ):
+                controller.target_throttle = 0.3
+
+            else:
+                controller.target_throttle = 0.5
+
+            return
+                        
+        # ---------------------------------------------------------
+        # 4. Descent control strategy
         # ---------------------------------------------------------
 
         if decision.mode is FlightMode.DESCENT:
@@ -148,7 +189,7 @@ class AutoPilot:
             return
 
         # ---------------------------------------------------------
-        # 4. normal altitude-control strategy
+        # 5. normal altitude-control strategy
         # ---------------------------------------------------------
 
         altitude_error = FlightCalculator.calculate_error(
