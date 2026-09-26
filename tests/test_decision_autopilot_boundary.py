@@ -405,3 +405,112 @@ def test_descent_control_corrects_horizontal_speed(
     # Target vertical speed is -5 m/s, actual is 0 m/s:
     # error = -5 - 0 = -5, so pitch command is -5°.
     assert controller.target_pitch == pytest.approx(-5.0)
+
+
+
+@pytest.mark.parametrize(
+        ("vertical_speed", "expected_pitch"),
+        [
+            (0.0, -1.5),
+            (-1.5, 0.0),
+            (-4.0, 2.5),
+        ],
+        )
+def test_landing_controls_vertical_speed(vertical_speed: float, expected_pitch: float):
+    mission = Mission(
+        target_altitude=3000.0,
+        cruise_speed=100.0,
+        route_distance=100_000.0,
+        landing_speed=55.0,
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=300.0,
+    )
+
+    autopilot = AutoPilot(
+        mission=mission,
+        descent_vertical_speed_gain=1.0,
+    )
+
+    decision = Decision(
+        mode=FlightMode.LANDING,
+        priority=RiskLevel.LOW,
+        reason=ThreatType.NONE,
+        message="Landing test.",
+        confidence=1.0,
+    )
+
+    plane = FakePlane(
+        horizontal_speed=100.0,
+        min_safe_speed=50.0,
+        aoa=5.0,
+        altitude=3000.0,
+        vertical_speed=vertical_speed,
+    )
+
+    controller = FakeController()
+
+    # ---------------------------------------------------------
+    # Act
+    # ---------------------------------------------------------
+    autopilot.update(
+        plane,
+        decision,
+        controller,
+    )
+
+    # ---------------------------------------------------------
+    # Assert
+    # ---------------------------------------------------------
+    assert controller.target_pitch == pytest.approx(expected_pitch)
+
+
+@pytest.mark.parametrize(
+    ("horizontal_speed", "expected_throttle"),
+    [
+        (45.0, 0.7),
+        (55.0, 0.5),
+        (65.0, 0.3),
+    ],
+)
+def test_landing_controls_horizontal_speed(
+    horizontal_speed: float,
+    expected_throttle: float,
+) -> None:
+    mission = Mission(
+        target_altitude=3000.0,
+        cruise_speed=100.0,
+        route_distance=100_000.0,
+        landing_speed=55.0,
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=300.0,
+    )
+
+    autopilot = AutoPilot(mission=mission)
+
+    decision = Decision(
+        mode=FlightMode.LANDING,
+        priority=RiskLevel.LOW,
+        reason=ThreatType.NONE,
+        message="Landing test.",
+        confidence=1.0,
+    )
+
+    plane = FakePlane(
+        horizontal_speed=horizontal_speed,
+        min_safe_speed=50.0,
+        aoa=5.0,
+        altitude=300.0,
+        vertical_speed=0.0,
+    )
+
+    controller = FakeController()
+
+    autopilot.update(
+        plane,
+        decision,
+        controller,
+    )
+
+    assert controller.target_throttle == pytest.approx(
+        expected_throttle
+    )
