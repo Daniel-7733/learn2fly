@@ -50,6 +50,8 @@ class AutoPilot:
         # Landing configuration
         self.landing_vertical_speed_mps = 1.5
         self.landing_vertical_speed_gain = 1.0
+        self.landing_trim_throttle = 0.15
+        self.landing_speed_gain = 0.02
 
     def update(self, plane: "Plane", decision: "Decision", controller: "FlightController") -> None:
         """
@@ -118,6 +120,10 @@ class AutoPilot:
         # ---------------------------------------------------------
 
         if decision.mode is FlightMode.LANDING:
+            # -----------------------------------------------------
+            # Vertical-speed control
+            # -----------------------------------------------------
+
             target_vertical_speed = -self.landing_vertical_speed_mps
 
             vertical_speed_error = FlightCalculator.calculate_error(
@@ -136,21 +142,28 @@ class AutoPilot:
                 self.max_pitch_command,
             )
 
-            if plane.horizontal_speed < (
-                self.mission.landing_speed - self.speed_deadband
-            ):
-                controller.target_throttle = 0.7
+            # -----------------------------------------------------
+            # Horizontal-speed control
+            # -----------------------------------------------------
 
-            elif plane.horizontal_speed > (
-                self.mission.landing_speed + self.speed_deadband
-            ):
-                controller.target_throttle = 0.3
+            landing_speed_error = FlightCalculator.calculate_error(
+                self.mission.landing_speed,
+                plane.horizontal_speed,
+            )
 
-            else:
-                controller.target_throttle = 0.5
+            throttle_command = FlightCalculator.proportional_command(
+                self.landing_speed_gain,
+                landing_speed_error,
+            )
+
+            controller.target_throttle = FlightCalculator.clamp(
+                self.landing_trim_throttle + throttle_command,
+                0.0,
+                1.0,
+            )
 
             return
-                        
+                                
         # ---------------------------------------------------------
         # 4. Descent control strategy
         # ---------------------------------------------------------
