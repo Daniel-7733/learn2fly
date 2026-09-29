@@ -52,6 +52,8 @@ class AutoPilot:
         self.landing_vertical_speed_gain = 1.0
         self.landing_trim_throttle = 0.15
         self.landing_speed_gain = 0.02
+        self.landing_pitch_trim_deg = 3.0
+
 
     def update(self, plane: "Plane", decision: "Decision", controller: "FlightController") -> None:
         """
@@ -131,10 +133,12 @@ class AutoPilot:
                 plane.vertical_speed,
             )
 
-            pitch_command = FlightCalculator.proportional_command(
+            pitch_correction = FlightCalculator.proportional_command(
                 self.landing_vertical_speed_gain,
                 vertical_speed_error,
             )
+
+            pitch_command = self.landing_pitch_trim_deg + pitch_correction
 
             controller.target_pitch = FlightCalculator.clamp(
                 pitch_command,
