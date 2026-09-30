@@ -411,9 +411,9 @@ def test_descent_control_corrects_horizontal_speed(
 @pytest.mark.parametrize(
         ("vertical_speed", "expected_pitch"),
         [
-            (0.0, 1.5),
-            (-1.5, 3.0),
-            (-4.0, 5.0),
+            (0.0, 6.0),
+            (-1.5, 7.5),
+            (-4.0, 10.0),
         ],
         )
 def test_landing_controls_vertical_speed(vertical_speed: float, expected_pitch: float):
@@ -467,9 +467,9 @@ def test_landing_controls_vertical_speed(vertical_speed: float, expected_pitch: 
 @pytest.mark.parametrize(
     ("horizontal_speed", "expected_throttle"),
     [
-        (45.0, 0.35),
-        (55.0, 0.15),
-        (70.0, 0.0),
+        (60.0, 0.445),  # 0.245 + 0.02 × 10
+        (70.0, 0.245),  # trim throttle
+        (80.0, 0.045),  # 0.245 + 0.02 × -10
     ],
 )
 def test_landing_controls_horizontal_speed(

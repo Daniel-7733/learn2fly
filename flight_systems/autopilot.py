@@ -48,11 +48,23 @@ class AutoPilot:
         self.descent_vertical_speed_gain = descent_vertical_speed_gain
         
         # Landing configuration
-        self.landing_vertical_speed_mps = 1.5
-        self.landing_vertical_speed_gain = 1.0
-        self.landing_trim_throttle = 0.15
-        self.landing_speed_gain = 0.02
-        self.landing_pitch_trim_deg = 3.0
+        self.landing_vertical_speed_mps: float = 1.5
+        self.landing_vertical_speed_gain: float = 1.0
+        # self.landing_trim_throttle: float = 0.15
+        self.cruise_trim_throttle = 0.5
+
+        landing_to_cruise_speed_ratio = (
+            self.mission.landing_speed
+            / self.mission.cruise_speed
+        )
+
+        self.landing_trim_throttle = (
+            self.cruise_trim_throttle
+            * landing_to_cruise_speed_ratio ** 2
+        )
+        self.landing_speed_gain: float = 0.02
+        self.landing_pitch_trim_deg: float = 7.5 
+        self.max_landing_pitch_command: float = 10.0
 
 
     def update(self, plane: "Plane", decision: "Decision", controller: "FlightController") -> None:
@@ -142,8 +154,8 @@ class AutoPilot:
 
             controller.target_pitch = FlightCalculator.clamp(
                 pitch_command,
-                -self.max_pitch_command,
-                self.max_pitch_command,
+                -self.max_landing_pitch_command,
+                self.max_landing_pitch_command,
             )
 
             # -----------------------------------------------------
