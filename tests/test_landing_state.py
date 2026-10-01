@@ -38,6 +38,7 @@ def make_safe_report(altitude: float) -> FlightReport:
         risk=RiskLevel.LOW,
         recoverability=Recoverability.EXCELLENT,
         energy_state=EnergyState.HIGH,
+        vertical_speed=-1.5,
     )
 
 def make_high_risk_stall_report(altitude: float) -> FlightReport:
@@ -54,6 +55,7 @@ def make_high_risk_stall_report(altitude: float) -> FlightReport:
         risk=RiskLevel.HIGH,
         recoverability=Recoverability.GOOD,
         energy_state=EnergyState.LOW,
+        vertical_speed=-6.0,
     )
 
 def test_safe_landing() -> None:

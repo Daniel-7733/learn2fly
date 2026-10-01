@@ -20,6 +20,7 @@ def make_safe_report(altitude: float) -> FlightReport:
         energy_state=EnergyState.HIGH,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
 
@@ -36,6 +37,7 @@ def make_high_risk_stall_report(altitude: float) -> FlightReport:
             energy_state=EnergyState.LOW,
             horizontal_speed = 100.0,
             distance_travelled_m = 30_000.0,
+            vertical_speed=0.0,
             )
 
 

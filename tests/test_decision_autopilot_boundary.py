@@ -65,6 +65,7 @@ def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
         energy_state=EnergyState.HIGH,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
     plane = FakePlane(
@@ -119,6 +120,7 @@ def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
                 energy_state=EnergyState.LOW,
                 horizontal_speed = 100.0,
                 distance_travelled_m = 30_000.0,
+                vertical_speed=0.0,
             ),
             FlightMode.EMERGENCY,
             ThreatType.STALL,
@@ -142,6 +144,7 @@ def make_cruise_scenario(altitude: float) -> tuple[FlightReport, FakePlane]:
                 energy_state=EnergyState.MODERATE,
                 horizontal_speed = 100.0,
                 distance_travelled_m = 30_000.0,
+                vertical_speed=0.0,
             ),
             FlightMode.EMERGENCY,
             ThreatType.IMPACT,

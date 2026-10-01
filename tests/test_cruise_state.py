@@ -41,6 +41,7 @@ def make_safe_report(
         risk=RiskLevel.LOW,
         recoverability=Recoverability.EXCELLENT,
         energy_state=EnergyState.HIGH,
+        vertical_speed=0.0,
     )
 
 
@@ -60,6 +61,7 @@ def make_high_risk_stall_report(
         risk=RiskLevel.HIGH,
         recoverability=Recoverability.GOOD,
         energy_state=EnergyState.LOW,
+        vertical_speed=0.0,
     )
 
 

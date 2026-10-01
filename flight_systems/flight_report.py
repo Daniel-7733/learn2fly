@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class FlightReport:
     def __init__(self, speed_margin: float, aoa_margin: float, altitude: float, time_to_stall: float, time_to_impact: float, 
                  most_urgent_threat: "ThreatType", risk: "RiskLevel", recoverability: "Recoverability", energy_state: "EnergyState",
-                 horizontal_speed: float, distance_travelled_m: float) -> None:
+                 horizontal_speed: float, distance_travelled_m: float, vertical_speed: float) -> None:
         """
         The responsibility is:
             FlightReport
@@ -25,6 +25,7 @@ class FlightReport:
         self.recoverability = recoverability
         self.energy_state = energy_state
         self.horizontal_speed = horizontal_speed
+        self.vertical_speed = vertical_speed
         self.distance_travelled_m = distance_travelled_m
 
     def __str__(self) -> str:

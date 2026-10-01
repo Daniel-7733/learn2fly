@@ -275,4 +275,5 @@ class FlightAnalyzer:
             energy_state,
             self.plane.horizontal_speed,
             self.plane.distance_travelled_m,
+            vertical_speed=self.plane.vertical_speed,
         )

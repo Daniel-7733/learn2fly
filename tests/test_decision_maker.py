@@ -56,6 +56,7 @@ from flight_systems.missions.mission import Mission
                 energy_state=EnergyState.LOW,
                 horizontal_speed = 100.0,
                 distance_travelled_m = 30_000.0,
+                vertical_speed=0.0,
             ),
             EmergencyState,
             FlightMode.EMERGENCY,
@@ -80,6 +81,7 @@ from flight_systems.missions.mission import Mission
                 energy_state=EnergyState.MODERATE,
                 horizontal_speed = 100.0,
                 distance_travelled_m = 30_000.0,
+                vertical_speed=0.0,
             ),
             EmergencyState,
             FlightMode.EMERGENCY,
@@ -104,6 +106,7 @@ from flight_systems.missions.mission import Mission
                 energy_state=EnergyState.HIGH,
                 horizontal_speed = 100.0,
                 distance_travelled_m = 30_000.0,
+                vertical_speed=0.0,
             ),
             CruiseState,
             FlightMode.CRUISE,
@@ -157,6 +160,7 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
         energy_state=EnergyState.LOW,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
     safe_report = FlightReport(
@@ -171,6 +175,7 @@ def test_cruise_to_emergency_and_back_to_cruise() -> None:
         energy_state=EnergyState.HIGH,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
     # The DecisionMaker begins in cruise.
@@ -226,6 +231,7 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
         energy_state=EnergyState.LOW,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
     safe_report = FlightReport(
@@ -240,6 +246,7 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
         energy_state=EnergyState.HIGH,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
     moderate_report = FlightReport(
@@ -254,6 +261,7 @@ def test_emergency_requires_consecutive_safe_updates() -> None:
         energy_state=EnergyState.MODERATE,
         horizontal_speed = 100.0,
         distance_travelled_m = 30_000.0,
+        vertical_speed=0.0,
     )
 
     # Enter EmergencyState.
