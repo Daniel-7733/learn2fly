@@ -409,13 +409,13 @@ def test_descent_control_corrects_horizontal_speed(
 
 
 @pytest.mark.parametrize(
-        ("vertical_speed", "expected_pitch"),
-        [
-            (0.0, 6.0),
-            (-1.5, 7.5),
-            (-4.0, 10.0),
-        ],
-        )
+    ("vertical_speed", "expected_pitch"),
+    [
+        (0.0, 5.5),
+        (-1.5, 7.0),
+        (-4.0, 9.5),
+    ],
+)
 def test_landing_controls_vertical_speed(vertical_speed: float, expected_pitch: float):
     mission = Mission(
         target_altitude=3000.0,
@@ -480,7 +480,7 @@ def test_landing_controls_horizontal_speed(
         target_altitude=3000.0,
         cruise_speed=100.0,
         route_distance=100_000.0,
-        landing_speed=55.0,
+        landing_speed=70.0,  
         planned_descent_speed_mps=5.0,
         landing_transition_altitude_m=300.0,
     )

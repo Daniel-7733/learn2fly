@@ -63,7 +63,7 @@ class AutoPilot:
             * landing_to_cruise_speed_ratio ** 2
         )
         self.landing_speed_gain: float = 0.02
-        self.landing_pitch_trim_deg: float = 7.5 
+        self.landing_pitch_trim_deg: float = 7.0
         self.max_landing_pitch_command: float = 10.0
 
 
