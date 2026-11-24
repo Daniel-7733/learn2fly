@@ -38,5 +38,6 @@ class FlightMode(Enum):
     DESCENT = "DESCENT"
     LANDING = "LANDING"
     EMERGENCY = "EMERGENCY"
+    LANDED = "LANDED"
 
 
