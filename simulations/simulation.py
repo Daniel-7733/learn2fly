@@ -32,6 +32,10 @@ class Simulation:
             if self.flight_system.plane.altitude <= 0:
                 self.stop()
                 break
+            
+            # Once the logic compeleted than we don;t need the above break
+            if self.flight_system.is_complete:
+                break
 
             # One aircraft heartbeat.
             self.flight_system.update(self.time_step)

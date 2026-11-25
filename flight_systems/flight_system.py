@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from config import GRAVITY
+from flight_systems.enums import FlightMode
 from .flight_calculator import FlightCalculator
 
 if TYPE_CHECKING:
@@ -47,6 +48,8 @@ class FlightSystem:
 
         self.energy_rate: float = 0.0
 
+        self.is_complete: bool = False
+
         self.decision_report: "FlightReport | None" = None
         self.current_decision: "Decision | None" = None
 
@@ -70,6 +73,10 @@ class FlightSystem:
 
         self.decision_report = self.flight_analyzer.report()
         self.current_decision = self.decision_maker.make_decision(self.decision_report)
+
+        # if the decision is Landed then is_compelete shold be True
+        if self.current_decision.mode is FlightMode.LANDED:
+            self.is_complete = True
 
         # ---------------------------------------------------------
         # 2. Preserve values from the previous frame

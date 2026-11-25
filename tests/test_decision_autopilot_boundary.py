@@ -517,3 +517,44 @@ def test_landing_controls_horizontal_speed(
     assert controller.target_throttle == pytest.approx(
         expected_throttle
     )
+
+
+def test_landed_state() -> None:
+    mission = Mission(
+        target_altitude=3000.0,
+        cruise_speed=100.0,
+        route_distance=100_000.0,
+        landing_speed=70.0,  
+        planned_descent_speed_mps=5.0,
+        landing_transition_altitude_m=300.0,
+    )
+
+    autopilot = AutoPilot(mission=mission)
+
+    decision = Decision(
+        mode=FlightMode.LANDED,
+        priority=RiskLevel.LOW,
+        reason=ThreatType.NONE,
+        message="Landed test.",
+        confidence=1.0,
+    )
+
+    plane = FakePlane(
+        horizontal_speed=70.0,
+        min_safe_speed=50.0,
+        aoa=5.0,
+        altitude=120.0,
+        vertical_speed=-1.5,
+    )
+
+    controller = FakeController()
+
+    autopilot.update(
+        plane,
+        decision,
+        controller,
+    )
+
+    assert controller.target_throttle == 0.0
+    assert controller.target_pitch == 0.0
+

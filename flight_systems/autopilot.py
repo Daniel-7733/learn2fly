@@ -113,6 +113,19 @@ class AutoPilot:
             return
 
         # ---------------------------------------------------------
+        # LANDED decision
+        # ---------------------------------------------------------
+        # The aircraft has completed touchdown.
+        # AutoPilot only commands safe stationary controls.
+        # FlightSystem owns completion status.
+
+        if decision.mode is FlightMode.LANDED:
+            controller.target_pitch = 0.0
+            controller.target_throttle = 0.0
+            return
+
+
+        # ---------------------------------------------------------
         # 2. Temporary fallback protection
         #
         # These checks can remain while the new DecisionMaker is

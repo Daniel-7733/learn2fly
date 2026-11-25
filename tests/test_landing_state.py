@@ -1,4 +1,7 @@
+from flight_systems.decisions import decision
+from flight_systems.decisions import decision_maker
 from flight_systems.decisions.decision_maker import DecisionMaker
+from flight_systems.decisions.states.landed_state import LandedState
 from flight_systems.decisions.states.landing_state import LandingState
 from flight_systems.decisions.states.emergency_state import EmergencyState
 from flight_systems.enums import (
@@ -10,6 +13,7 @@ from flight_systems.enums import (
 )
 from flight_systems.flight_report import FlightReport
 from flight_systems.missions.mission import Mission
+from flight_systems.decisions.states.landed_state import LandedState
 
 
 def make_mission() -> Mission:
@@ -86,3 +90,77 @@ def test_unsafe_landing() -> None:
     assert decision.priority is RiskLevel.HIGH
     assert isinstance(decision_maker.current_state, EmergencyState)
 
+
+def make_report_for_touchdown(altitude: float, vertical_speed: float, horizontal_speed: float) -> FlightReport:
+    return FlightReport(
+        altitude=altitude,
+        horizontal_speed=horizontal_speed,
+        distance_travelled_m=30_000.0,
+        speed_margin=50.0,
+        aoa_margin=10.0,
+        time_to_stall=99.0,
+        time_to_impact=99.0,
+        most_urgent_threat=ThreatType.NONE,
+        risk=RiskLevel.LOW,
+        recoverability=Recoverability.EXCELLENT,
+        energy_state=EnergyState.HIGH,
+        vertical_speed=vertical_speed,
+    )
+
+
+def test_safe_touchdown() -> None:
+    """
+    test_safe_touchdown:
+        start in LandingState
+        safe ground report
+        → LandedState
+    """
+    mission = make_mission()
+    decision_maker = DecisionMaker(mission)
+    decision_maker.change_state(LandedState())
+    
+    report = make_report_for_touchdown(
+            altitude=0.0,
+            vertical_speed=-1.5,
+            horizontal_speed=70.0
+            )
+    decision = decision_maker.make_decision(report)
+
+    assert decision.mode is FlightMode.LANDED
+    assert decision.reason is ThreatType.NONE
+    assert decision.priority is RiskLevel.LOW
+    assert isinstance(decision_maker.current_state, LandedState)
+    
+
+
+def test_unsafe_touchdown() -> None:
+    """
+    test_unsafe_touchdown:
+        start in LandingState
+        unsafe ground report
+        → EmergencyState
+    """
+    mission = make_mission()
+    decision_maker = DecisionMaker(mission)
+
+    # The aircraft is approaching the ground,
+    # so the starting state must be LandingState.
+    decision_maker.change_state(LandingState())
+
+    report = make_report_for_touchdown(
+        altitude=0.0,
+        vertical_speed=-4.35,
+        horizontal_speed=63.16,
+    )
+
+    decision = decision_maker.make_decision(report)
+
+    assert decision.mode is FlightMode.EMERGENCY
+    assert decision.reason is ThreatType.IMPACT
+    assert decision.priority is RiskLevel.LOW
+    assert isinstance(
+        decision_maker.current_state,
+        EmergencyState,
+    )
+
+   
